@@ -1,0 +1,76 @@
+import java.awt.*;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
+import java.nio.charset.StandardCharsets;
+import java.util.Iterator;
+import java.util.Set;
+
+public class NonBlockingSelectorServer {
+    public static void main(String[] args) throws IOException {
+        int id = 0;
+        MessageContent content = new MessageContent();
+
+        ServerSocketChannel server = ServerSocketChannel.open();
+        server.socket().bind(new InetSocketAddress(1234));
+        server.socket().setReuseAddress(true);
+        server.configureBlocking(false);
+
+        Selector selector = Selector.open();
+        server.register(selector, SelectionKey.OP_ACCEPT);
+
+        ByteBuffer buffer = ByteBuffer.allocate(128);
+
+        while (true) {
+            int channelCount = selector.select();
+            if (channelCount > 0) {
+                Set<SelectionKey> keys = selector.selectedKeys();
+                Iterator<SelectionKey> iterator = keys.iterator();
+
+                while (iterator.hasNext()) {
+                    SelectionKey key = iterator.next();
+
+                    if (key.isAcceptable()) {
+                        System.out.println("client connected");
+                        SocketChannel client = server.accept();
+                        client.configureBlocking(false);
+                        SelectionKey newkey = client.register(selector, SelectionKey.OP_READ, client.socket().getPort());
+                        newkey.attach(0);
+                    } else if (key.isReadable()) {
+                        SocketChannel client = (SocketChannel) key.channel();
+                        if (client.read(buffer) < 0) {
+                            key.cancel();
+                        } else {
+
+                            String msg = new String(buffer.array(), 0,  buffer.position());
+                            System.out.println(msg);
+                            if(msg.contains("ACK")){
+                                System.out.println("Je ferme la connexion");
+                                client.write(ByteBuffer.wrap("close".getBytes(StandardCharsets.UTF_8)));
+                                client.close();
+                                buffer.clear();
+                                continue;
+                            }
+                            String responseServ = content.getChoice(msg, id++); //choix du client
+
+
+                            buffer.flip();
+                            key.attach(Integer.parseInt(key.attachment().toString())+1);
+                            byte[] response = (responseServ + "\n").getBytes(StandardCharsets.UTF_8);
+                            client.write(ByteBuffer.wrap(response));
+
+                            buffer.clear();
+
+                        }
+                    }
+                    iterator.remove();
+                }
+            }
+        }
+    }
+}
