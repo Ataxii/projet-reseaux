@@ -25,6 +25,7 @@ public class Message {
     }
 
 
+
     public void addResponse(Message response) {
         this.responses.add(response);
     }
@@ -46,7 +47,7 @@ public class Message {
     }
 
     /**
-     * donnez la requete en brut et la fonction le tranforme en message
+     * donnez la requete en brut et la fonction le transforme en message
      * @param request la requete avec toutes les informations dedans
      * @param id l'id du message
      */

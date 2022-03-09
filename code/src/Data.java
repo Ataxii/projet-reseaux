@@ -36,6 +36,11 @@ public class Data {
         return result;
     }
 
+    /**
+     * est ce qu'il y a un message avec comme id id
+     * @param id que l'on souhaite rechercher
+     * @return oui ou non
+     */
     public boolean containsID(int id){
         boolean result = false;
         for (Map.Entry<Integer, Message> message : messages.entrySet()) {
@@ -47,6 +52,12 @@ public class Data {
     }
 
 
+    /**
+     * fait soit un ajout de tout les messages publié par l'author soit une retruction
+     * @param dataBase ce qu'on a deja comme message
+     * @param author pour trier
+     * @return une nouvelle database
+     */
     public ArrayList<Message> findAuthor(ArrayList<Message> dataBase, String author) {
         if(dataBase.size() == 0){
             for (Map.Entry<Integer, Message> message : messages.entrySet()) {

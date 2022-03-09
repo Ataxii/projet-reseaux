@@ -49,6 +49,8 @@ public class NonBlockingSelectorServer {
 
                             String msg = new String(buffer.array(), 0,  buffer.position());
                             System.out.println(msg);
+
+                            //verification de la fermeture du serveur
                             if(msg.contains("ACK")){
                                 System.out.println("Je ferme la connexion");
                                 client.write(ByteBuffer.wrap("close".getBytes(StandardCharsets.UTF_8)));

@@ -7,6 +7,12 @@ public class MessageContent {
     public MessageContent() {
     }
 
+    /**
+     * ce qui fait le choix par rapport à la requette du client
+     * @param request le message du client
+     * @param id du message
+     * @return message d'erreur ou de validation
+     */
     public String getChoice(String request, int id){
         String[] data = request.split(" ");
         String command = data[0];
@@ -29,6 +35,12 @@ public class MessageContent {
         }
     }
 
+    /**
+     *
+     * @param request du client
+     * @param initId l'id que l'on va donner a la reply
+     * @return message d'erreur ou de validation
+     */
     private String reply_to_id(String request, int initId) {
 
         int id = Integer.parseInt(request.split("reply_to_id:")[1].split(" ")[0].replace("\r\n", ""));
@@ -41,6 +53,11 @@ public class MessageContent {
     }
 
 
+    /**
+     * fonction pour recevoir le contenus du message qui a l'id stocké dans la request
+     * @param request de l'utilisateur
+     * @return soit le message soit ERROR
+     */
     private String rcv_msg(String request) {
         int id = Integer.parseInt(request.split("msg_id:")[1]);
         if(!data.containsID(id)){
@@ -50,26 +67,31 @@ public class MessageContent {
         return data.messages.get(id).getMessage();
     }
 
+    /**
+     * donne la reponse pour publish
+     * @param condition pour le message
+     * @return un message d'erreur ou de validation
+     */
     public String response(Boolean condition){
         if(!condition)
             return "ERROR";
         return "OK";
     }
 
+    /**
+     * fonction qui verifie et publie le message par l'utilisateur
+     * @param request tout le message envoyé par le client
+     * @param id du client
+     * @return un message d'erreur ou de validation
+     */
     public Boolean publish(String request, int id){
 
-        Boolean verif = true;
+        boolean verif = true;
         String entete = request.split("\r\n")[0];
         String body = request.split("\r\n")[1];
         String[] msarray = request.split(" ");
 
-
-        /** On peut peut-être mettre en une ligne avec des "||" ? **/
-        if(!entete.contains("author:"))
-            verif = false;
-        if(entete.length() <= "author:@".length())
-            verif = false;
-        if(body.toCharArray().length > 280 )
+        if(!entete.contains("author:") || entete.length() <= "author:@".length()||body.toCharArray().length > 280 )
             verif = false;
 
         if (verif){
@@ -81,6 +103,16 @@ public class MessageContent {
         return verif;
     }
 
+
+    /**
+     * Principe de la fonction : regarde si les arguments sont dans la request
+     *      pour chaque request, on recupere les elements que l'on met dans les fonctions qui regardent si la database
+     *      est vide ou si il y a des elements
+     *       -si elle est vide on ajoute les elements dans data base
+     *       -si elle est pas vide on supprime par rapport au element que l'on a
+     * @param request le message en entier
+     * @return message pour confirmer ou non la requete
+     */
     public String rcv_ids(String request){
 
         ArrayList<String> result = new ArrayList<>();
@@ -124,7 +156,6 @@ public class MessageContent {
                     result.add(dataBase.get(i).getMessage().replace("\n",""));
                 }
             }
-            System.out.println(result.toString());
             return result.toString();
         }
     }
