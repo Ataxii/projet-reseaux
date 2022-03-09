@@ -30,15 +30,8 @@ public class MessageContent {
     }
 
     private String reply_to_id(String request, int initId) {
-        //TODO: ya un probleme iciException in thread "main" java.lang.NumberFormatException: For input string: "0
-        //"
-        //        at java.base/java.lang.NumberFormatException.forInputString(NumberFormatException.java:67)
-        //        at java.base/java.lang.Integer.parseInt(Integer.java:668)
-        //        at java.base/java.lang.Integer.parseInt(Integer.java:786)
-        //        at MessageContent.reply_to_id(MessageContent.java:33)
-        //        at MessageContent.getChoice(MessageContent.java:25)
-        //        at NonBlockingSelectorServer.main(NonBlockingSelectorServer.java:59)
-        int id = Integer.parseInt(request.split("reply_to_id:")[1].split(" ")[0]);
+
+        int id = Integer.parseInt(request.split("reply_to_id:")[1].split(" ")[0].replace("\r\n", ""));
 
         if (data.containsID(id)){
             data.responseId(id).addResponse(new Message(request, initId));
