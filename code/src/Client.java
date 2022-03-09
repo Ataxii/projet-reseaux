@@ -88,6 +88,15 @@ public class Client {
                 String reply_id = request.split(" ")[2];
                 return command + " " + author + " " + reply_id + "\r\n" + request.split(reply_id)[1].split("\n")[0] +" ";
 
+            case "REPUBLISH":
+                while(request.split(" ").length < 4){
+                    System.out.println("Usage : REPUBLISH [author:@user] [msg_id:id]");
+                    request = scanner.nextLine();
+                }
+                author = request.split(" ")[1];
+                String msg_id = request.split(" ")[2];
+                return command + " " + author + " " + msg_id + "\r\n";
+
             default:
                 System.out.println("Commande inconnu, \r\n Usage : PUBLISH [author:@user] Message \r\n" +
                         " Usage : RCV_IDS [author:@user] [tag:#tag] [since_id:id] [limit:n]");

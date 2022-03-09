@@ -8,6 +8,7 @@ public class Message {
     private String author;
     private String message;
     private ArrayList<String> hashtag;
+    private Boolean republish;
 
     /**
      * creation avec tout les arguments connu
@@ -16,18 +17,23 @@ public class Message {
      * @param hashtag tous les hashtag qui sont dans le message
      * @param message le contenu du message
      */
-    public Message(int id, String author, ArrayList<String> hashtag, String message) {
+    public Message(int id, String author, ArrayList<String> hashtag, String message, boolean republish) {
         this.id = id;
         this.author = author;
         this.hashtag = hashtag;
         this.message = message;
         this.responses = new ArrayList<>();
+        this.republish = republish;
     }
 
 
 
     public void addResponse(Message response) {
         this.responses.add(response);
+    }
+
+    public void setRepublish(Boolean republish) {
+        this.republish = republish;
     }
 
     public ArrayList<Message> getResponse() {
@@ -70,5 +76,6 @@ public class Message {
         }
         this.responses = new ArrayList<>();
 
+        this.republish = false;
     }
 }

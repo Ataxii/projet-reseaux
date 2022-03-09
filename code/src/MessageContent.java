@@ -30,9 +30,31 @@ public class MessageContent {
             case "REPLY":
                 return reply_to_id(request, id);
 
+            case "REPUBLISH":
+                return response(republish(request, id));
+
             default:
                 return "Command not found";
         }
+    }
+
+    /**
+     * ajout d'un nouveau message qui reprend celui de id mais en modifiant l'author et l'id
+     * @param request la request du client
+     * @param initial est le nouvelle id
+     * @return vrai ou faux
+     */
+    private Boolean republish(String request, int initial) {
+        int id = Integer.parseInt(request.split("msg_id:")[1].split(" ")[0].replace("\r\n", ""));
+
+        String author = request.split("author:@")[1].split(" ")[0].replace("\r\n", "");
+        if(!data.containsID(id)){
+            return false;
+        }
+        Message originalMessage = data.responseId(id);
+        Message newMessage = new Message(initial, author, originalMessage.getHashtag(), originalMessage.getMessage(), true);
+        data.add(newMessage);
+        return true;
     }
 
     /**
