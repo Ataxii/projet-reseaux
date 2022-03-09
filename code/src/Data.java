@@ -5,6 +5,7 @@ import java.util.Objects;
 
 public class Data {
 
+    HashMap<Integer, Message> messageHashMap;
     HashMap<Integer, Message> messages;
 
     public Data() {

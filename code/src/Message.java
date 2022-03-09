@@ -3,7 +3,7 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public class Message {
-    private ArrayList<Message> response;
+    private ArrayList<Message> responses;
     public int id;
     private String author;
     private String message;
@@ -21,16 +21,16 @@ public class Message {
         this.author = author;
         this.hashtag = hashtag;
         this.message = message;
-        this.response = new ArrayList<>();
+        this.responses = new ArrayList<>();
     }
 
 
     public void addResponse(Message response) {
-        this.response.add(response);
+        this.responses.add(response);
     }
 
     public ArrayList<Message> getResponse() {
-        return response;
+        return responses;
     }
 
     public String getAuthor() {
@@ -67,7 +67,7 @@ public class Message {
                     hashtag.add(word.split(" ")[0]);
             }
         }
-        this.response = new ArrayList<>();
+        this.responses = new ArrayList<>();
 
     }
 }
