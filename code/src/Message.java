@@ -9,6 +9,7 @@ public class Message {
     private String message;
     private ArrayList<String> hashtag;
     private Boolean republish;
+    private int reply;
 
     /**
      * creation avec tout les arguments connu
@@ -17,13 +18,14 @@ public class Message {
      * @param hashtag tous les hashtag qui sont dans le message
      * @param message le contenu du message
      */
-    public Message(int id, String author, ArrayList<String> hashtag, String message, boolean republish) {
+    public Message(int id, String author, ArrayList<String> hashtag, String message, boolean republish, int reply) {
         this.id = id;
         this.author = author;
         this.hashtag = hashtag;
         this.message = message;
         this.responses = new ArrayList<>();
         this.republish = republish;
+        this.reply = reply;
     }
 
 
@@ -52,12 +54,28 @@ public class Message {
         return hashtag;
     }
 
+    @Override
+    public String toString() {
+        String result = "";
+        result += "author:" +  author + " msg_id:" + id ;
+        if(reply != -1){
+            result += " reply_to_id:" + reply;
+        }
+
+        if(republish){
+            result += " republished:" + republish;
+        }
+
+        result += "\n" + message + "\r";
+        return result;
+    }
+
     /**
      * donnez la requete en brut et la fonction le transforme en message
      * @param request la requete avec toutes les informations dedans
      * @param id l'id du message
      */
-    public Message(String request, int id){
+    public Message(String request, int id, int reply){
         this.id = id;
 
         String[] msarray = request.split(" ");
@@ -77,5 +95,6 @@ public class Message {
         this.responses = new ArrayList<>();
 
         this.republish = false;
+        this.reply = reply;
     }
 }

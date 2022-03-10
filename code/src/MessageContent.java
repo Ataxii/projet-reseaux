@@ -16,7 +16,7 @@ public class MessageContent {
     public String getChoice(String request, int id){
         String[] data = request.split(" ");
         String command = data[0];
-        System.out.println("Command = " + command);
+
         switch(command){
             case "PUBLISH":
                 return response(publish(request, id));
@@ -52,23 +52,29 @@ public class MessageContent {
             return false;
         }
         Message originalMessage = data.responseId(id);
-        Message newMessage = new Message(initial, author, originalMessage.getHashtag(), originalMessage.getMessage(), true);
+        Message newMessage = new Message(initial, author, originalMessage.getHashtag(), originalMessage.getMessage(), true, -1);
         data.add(newMessage);
+        System.out.println(newMessage);
         return true;
     }
 
     /**
      *
      * @param request du client
-     * @param initId l'id que l'on va donner a la reply
+     * @param initId l'id que l'on va donner a la reply pour en faire un nouveau message
      * @return message d'erreur ou de validation
      */
     private String reply_to_id(String request, int initId) {
 
+        //l'id du message au quel on repond
         int id = Integer.parseInt(request.split("reply_to_id:")[1].split(" ")[0].replace("\r\n", ""));
 
+        //on ajoute le message dans les reply du message et on l'ajoute en tant que message lui meme
         if (data.containsID(id)){
-            data.responseId(id).addResponse(new Message(request, initId));
+            Message newMessage = new Message(request, initId, id);
+            data.responseId(id).addResponse(newMessage);
+            data.add(newMessage);
+            System.out.println(newMessage);
             return "OK";
         }
         return "ERROR";
@@ -117,9 +123,11 @@ public class MessageContent {
             verif = false;
 
         if (verif){
-            data.add(new Message(request, id));
-            System.out.println("author:" + msarray[1].substring(7).replace("\r\n" , ""));
-            System.out.println("Message = " + body + "\r\nid = " + id);
+            Message newMessage = new Message(request, id, -1);
+            data.add(newMessage);
+            System.out.println(newMessage);
+            //System.out.println("author:" + msarray[1].substring(7).replace("\r\n" , ""));
+            //System.out.println("Message = " + body + "\r\nid = " + id);
         }
 
         return verif;
@@ -165,9 +173,9 @@ public class MessageContent {
             dataBase = data.findLimite(dataBase, limite);
         }
 
-        System.out.println("Data = " + data);
-        System.out.println("Database = " + dataBase);
-        System.out.println("Database size = " + dataBase.size());
+        //System.out.println("Data = " + data);
+        //System.out.println("Database = " + dataBase);
+        //System.out.println("Database size = " + dataBase.size());
 
         if(dataBase.size() == 0){
             return "Auncun message trouvé";
