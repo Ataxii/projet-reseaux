@@ -7,6 +7,8 @@ public class MessageContent {
     public MessageContent() {
     }
 
+    //TODO: faire un message d'erreur pour chaque probleme ERROR + id not found ....
+
     /**
      * ce qui fait le choix par rapport à la requette du client
      * @param request le message du client
@@ -67,7 +69,9 @@ public class MessageContent {
     private String reply_to_id(String request, int initId) {
 
         //l'id du message au quel on repond
+
         int id = Integer.parseInt(request.split("reply_to_id:")[1].split(" ")[0].replace("\r\n", ""));
+
 
         //on ajoute le message dans les reply du message et on l'ajoute en tant que message lui meme
         if (data.containsID(id)){

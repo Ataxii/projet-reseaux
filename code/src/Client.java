@@ -51,13 +51,21 @@ public class Client {
         }
     }
 
+
+    /**
+     * regarde si la commande est bien ecrite
+     *      si [] alors on peut ne pas le mettre sinon ca doit y etre
+     * @param request l'entrée de l'utilisateur
+     * @param command la commande invoqué par l'utisateur
+     * @return le bon format en fonction de la requete
+     */
     public static String command_format(String request, String command){
         Scanner scanner =  new Scanner(System.in);
 
         switch(command){
             case "PUBLISH":
-                while(request.split(" ").length < 3){
-                    System.out.println("Usage : PUBLISH [author:@user] Message");
+                while(request.split(" ").length < 3 || !request.contains("author:@")){
+                    System.out.println("Usage : PUBLISH author:@user Message");
                     request = scanner.nextLine();
                 }
                 String pseudo = request.split(" ")[1];
@@ -73,15 +81,15 @@ public class Client {
                 return request + " ";
 
             case "RCV_MSG":
-                while(request.split(" ").length == 3){
-                    System.out.println("Usage : RCV_MSG [msg_id:id]");
+                while(request.split(" ").length == 3 || !request.contains("msg_id:")){
+                    System.out.println("Usage : RCV_MSG msg_id:id");
                     request = scanner.nextLine();
                 }
                 return request+ " ";
 
             case "REPLY":
-                while(request.split(" ").length < 4){
-                    System.out.println("Usage : REPLY [author:@user] [reply_to_id:id]");
+                while(request.split(" ").length < 4 || !request.contains("author:@") || !request.contains("reply_to_id:") ){
+                    System.out.println("Usage : REPLY author:@user reply_to_id:id msg ");
                     request = scanner.nextLine();
                 }
                 String author = request.split(" ")[1];
@@ -89,17 +97,21 @@ public class Client {
                 return command + " " + author + " " + reply_id + "\r\n" + request.split(reply_id)[1].split("\n")[0] +" ";
 
             case "REPUBLISH":
-                while(request.split(" ").length < 4){
-                    System.out.println("Usage : REPUBLISH [author:@user] [msg_id:id]");
+                while(request.split(" ").length < 3 || !request.contains("author:@") || !request.contains("msg_id:")){
+                    System.out.println("Usage : REPUBLISH author:@user msg_id:id");
                     request = scanner.nextLine();
                 }
                 author = request.split(" ")[1];
                 String msg_id = request.split(" ")[2];
-                return command + " " + author + " " + msg_id + "\r\n";
+                return command + " " + author + " " + msg_id + " \r\n";
 
             default:
-                System.out.println("Commande inconnu, \r\n Usage : PUBLISH [author:@user] Message \r\n" +
-                        " Usage : RCV_IDS [author:@user] [tag:#tag] [since_id:id] [limit:n]");
+                System.out.println("Commande inconnu, \r\n " +
+                        "Usage : PUBLISH author:@user Message \r\n" +
+                        "Usage : RCV_IDS [author:@user] [tag:#tag] [since_id:id] [limit:n] \r\n" +
+                        "Usage : RCV_MSG msg_id:id \r\n" +
+                        "Usage : REPLY author:@user reply_to_id:id Message \r\n " +
+                        "Usage : REPUBLISH author:@user msg_id:id \r\n");
                 return null;
         }
     }
