@@ -1,6 +1,4 @@
-import java.awt.*;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
@@ -14,10 +12,10 @@ import java.util.Set;
 public class NonBlockingSelectorServer {
     public static void main(String[] args) throws IOException {
         int id = 0;
-        MessageContent content = new MessageContent();
+        Command content = new Command();
 
         ServerSocketChannel server = ServerSocketChannel.open();
-        server.socket().bind(new InetSocketAddress(1234));
+        server.socket().bind(new InetSocketAddress(12345));
         server.socket().setReuseAddress(true);
         server.configureBlocking(false);
 

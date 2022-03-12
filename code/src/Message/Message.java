@@ -1,5 +1,6 @@
+package Message;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Objects;
 
 public class Message {
@@ -11,13 +12,13 @@ public class Message {
     private Boolean republish;
     private int reply;
 
-    /**
+    /**************************************************************************************************
      * creation avec tout les arguments connu
      * @param id numero du message
      * @param author l'auteur du message
      * @param hashtag tous les hashtag qui sont dans le message
      * @param message le contenu du message
-     */
+     *************************************************************************************************/
     public Message(int id, String author, ArrayList<String> hashtag, String message, boolean republish, int reply) {
         this.id = id;
         this.author = author;
@@ -70,11 +71,11 @@ public class Message {
         return result;
     }
 
-    /**
+    /**************************************************************************************************
      * donnez la requete en brut et la fonction le transforme en message
      * @param request la requete avec toutes les informations dedans
      * @param id l'id du message
-     */
+     *************************************************************************************************/
     public Message(String request, int id, int reply){
         this.id = id;
 

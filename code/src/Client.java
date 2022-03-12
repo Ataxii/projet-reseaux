@@ -1,5 +1,4 @@
 import java.io.*;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Scanner;
 
@@ -19,7 +18,42 @@ public class Client {
 
 
         Scanner scanner =  new Scanner(System.in);
-        System.out.println("Que veux tu faire ?");
+
+
+        //si jamais le client ecrit pas un chiffre je sais pas comment faire a part de faire un try catch
+        while(true){
+            System.out.println("Que veux tu faire ? /n connection au flux (1) : envoie de requete (2)");
+            String input = scanner.nextLine();
+            try{
+                if(Integer.parseInt(input) == 1){
+                    flux();
+                }
+                if(Integer.parseInt(input) == 2){
+                    request(out, in, socket);
+                }
+                else System.out.println("connection au flux (1) : envoie de requete (2)");
+            }catch (Exception e){
+                System.out.println("connection au flux (1) : envoie de requete (2)");
+            }
+        }
+    }
+
+    private static void flux() {
+
+    }
+
+
+    /**
+     * gestion de la recuperation de la commande du client et de l'envoi au serveur
+     * @param out envoie de messages
+     * @param in recection de message
+     * @param socket de connection au serveur
+     * @throws IOException pour readLine
+     */
+    public static void request(PrintStream out, BufferedReader in, Socket socket) throws IOException {
+
+        System.out.println("vous etes dans la section requete \n");
+        Scanner scanner =  new Scanner(System.in);
 
         //envoie du message
         while(scanner.hasNextLine()){
@@ -33,7 +67,7 @@ public class Client {
                 message_formated = command_format(data, data.split(" ")[0]);
             }
             out.println(message_formated);
-            String response,close;
+            String response;
             while(true){
                 response = in.readLine();
                 if(response != null)
@@ -47,7 +81,6 @@ public class Client {
             out.close();
             socket.close();
             return;
-
         }
     }
 
@@ -65,7 +98,7 @@ public class Client {
         switch(command){
             case "PUBLISH":
                 while(request.split(" ").length < 3 || !request.contains("author:@")){
-                    System.out.println("Usage : PUBLISH author:@user Message");
+                    System.out.println("Usage : PUBLISH author:@user Message.Message");
                     request = scanner.nextLine();
                 }
                 String pseudo = request.split(" ")[1];
@@ -107,10 +140,10 @@ public class Client {
 
             default:
                 System.out.println("Commande inconnu, \r\n " +
-                        "Usage : PUBLISH author:@user Message \r\n" +
+                        "Usage : PUBLISH author:@user Message.Message \r\n" +
                         "Usage : RCV_IDS [author:@user] [tag:#tag] [since_id:id] [limit:n] \r\n" +
                         "Usage : RCV_MSG msg_id:id \r\n" +
-                        "Usage : REPLY author:@user reply_to_id:id Message \r\n " +
+                        "Usage : REPLY author:@user reply_to_id:id Message.Message \r\n " +
                         "Usage : REPUBLISH author:@user msg_id:id \r\n");
                 return null;
         }

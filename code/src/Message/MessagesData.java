@@ -1,30 +1,31 @@
+package Message;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public class Data {
+public class MessagesData {
 
-    HashMap<Integer, Message> messageHashMap;
-    HashMap<Integer, Message> messages;
+    public HashMap<Integer, Message> messages;
 
-    public Data() {
+    public MessagesData() {
         messages = new HashMap<>();
     }
 
-    /**
+    /**************************************************************************************************
      * ajout de message dans la Data, la position du message est son id
      * @param message le message avec toutes les données qu'il doit contenir
-     */
+     *************************************************************************************************/
     public void add(Message message){
         messages.put(message.id, message);
     }
 
-    /**
+    /**************************************************************************************************
      * recuperation de message
      * @param id a partir du quel on veut recuperer les messages
      * @return liste de message
-     */
+     *************************************************************************************************/
     public ArrayList<Message> findId(int id){
         ArrayList<Message> result = new ArrayList<>();
         for (int i = messages.size()-1; i > id ; i--) {
@@ -36,28 +37,29 @@ public class Data {
         return result;
     }
 
-    /**
+    /**************************************************************************************************
      * est ce qu'il y a un message avec comme id id
      * @param id que l'on souhaite rechercher
      * @return oui ou non
-     */
+     *************************************************************************************************/
     public boolean containsID(int id){
         boolean result = false;
         for (Map.Entry<Integer, Message> message : messages.entrySet()) {
-            if(message.getValue().id == id){
+            if (message.getValue().id == id) {
                 result = true;
+                break;
             }
         }
         return result;
     }
 
 
-    /**
+    /**************************************************************************************************
      * fait soit un ajout de tout les messages publié par l'author soit une retruction
      * @param dataBase ce qu'on a deja comme message
      * @param author pour trier
      * @return une nouvelle database
-     */
+     *************************************************************************************************/
     public ArrayList<Message> findAuthor(ArrayList<Message> dataBase, String author) {
         if(dataBase.size() == 0){
             for (Map.Entry<Integer, Message> message : messages.entrySet()) {
