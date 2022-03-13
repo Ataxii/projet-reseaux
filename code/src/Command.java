@@ -59,8 +59,8 @@ public class Command {
      * @return vrai ou faux
      *************************************************************************************************/
     private boolean subscribe(String request) {
-        String author = request.split("author:@")[1].split(" ")[0];
-        String user = request.split("user:@")[1].split(" ")[0];
+        String author = request.split("author:@")[1].split(" ")[0].replace(" ", "").replace("\n", "");
+        String user = request.split("user:@")[1].split(" ")[0].replace(" ", "").replace("\n", "");
 
         if(!usersData.userList.containsKey(user)){
             return false;

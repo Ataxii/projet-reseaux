@@ -58,7 +58,7 @@ public class Message {
     @Override
     public String toString() {
         String result = "";
-        result += "author:" +  author + " msg_id:" + id ;
+        result += "author:@" +  author + " msg_id:" + id ;
         if(reply != -1){
             result += " reply_to_id:" + reply;
         }
@@ -80,7 +80,7 @@ public class Message {
         this.id = id;
 
         String[] msarray = request.split(" ");
-        this.author = msarray[1].substring(7).replace("\r\n" , "").replace(" ", "");
+        this.author = msarray[1].substring(7).replace("\r\n" , "").replace(" ", "").replace("@" , "");
 
         this.message = request.split("\r\n")[1];
 

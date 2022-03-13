@@ -5,7 +5,7 @@ import Message.Message;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class UsersData {
 
@@ -19,14 +19,14 @@ public class UsersData {
     public HashMap<String, User> userList;
 
     //liste pour chaque utilisateur, les messages a publier <User qui veut recup les messages, liste des message a recuperer>
-    private ConcurrentSkipListMap<User, ArrayBlockingQueue<Message>> messagesToUpdate;
+    public ConcurrentHashMap<User, ArrayBlockingQueue<Message>> messagesToUpdate;
 
     //un utilisateur et ses abonnés
     public HashMap<String, ArrayList<User>> subscribesTo;
 
     public UsersData() {
         this.userList = new HashMap<String, User>();
-        this.messagesToUpdate = new ConcurrentSkipListMap<>();
+        this.messagesToUpdate = new ConcurrentHashMap<User, ArrayBlockingQueue<Message>>();
         this.subscribesTo = new HashMap<>();
     }
 
@@ -37,17 +37,29 @@ public class UsersData {
      */
     public void addMessage(Message message){
 
-        if(!subscribesTo.containsKey(message.getAuthor())){
-            userList.put(message.getAuthor(), new User(message.getAuthor()));
-        }
-        if(!subscribesTo.containsKey(message.getAuthor())){
-            subscribesTo.put(message.getAuthor(), new ArrayList<User>());
-        }
+        newUser(new User(message.getAuthor()));
+
         for (User user: subscribesTo.get(message.getAuthor())){
             if (!messagesToUpdate.containsKey(user)){
                 messagesToUpdate.put(user, new ArrayBlockingQueue<Message>(300));
             }
             messagesToUpdate.get(user).add(message);
+        }
+    }
+
+    /**
+     * regarde si il faut ajouter le user de partout pour eviter les problemes de nullPointerException
+     * @param user l'utilisateur qui va etre ajouté
+     */
+    public void newUser(User user){
+        if(!userList.containsKey(user.userName)){
+            userList.put(user.userName, new User(user.userName));
+        }
+        if(!subscribesTo.containsKey(user.userName)){
+            subscribesTo.put(user.userName, new ArrayList<User>());
+        }
+        if(!messagesToUpdate.containsKey(user)){
+            messagesToUpdate.put(user, new ArrayBlockingQueue<Message>(50));
         }
     }
 
@@ -58,6 +70,11 @@ public class UsersData {
      * @param user la personne qui va etre ajouter a la liste de name
      */
     public void addSubscribe(String name, User user){
+
+        //par précaution
+        newUser(user);
+        newUser(new User(name));
+
         if (userList.containsKey(name)){
             userList.get(name).addSubscribe(user);
             if (!subscribesTo.containsKey(user.userName)){
@@ -81,9 +98,5 @@ public class UsersData {
 
     public User getUser(String nameUser){
         return userList.get(nameUser);
-    }
-
-    public ConcurrentSkipListMap<User, ArrayBlockingQueue<Message>> getMessagesToUpdate(){
-        return messagesToUpdate;
     }
 }

@@ -54,11 +54,14 @@ public class Client {
         out.println("fluxconnect " + pseudo );
         //jsute pour qu'on puisse interompre propement le flux avec une entrée utlisateur
 
+        //TODO : corriger le probleme, le thread n'est pas mis sur le coté pour laisser place au scanner
         MyFlux flux = new MyFlux(in);
         flux.run();
         String responseCLient;
+        System.out.println("passage du thread");
         while(scanner.hasNextLine()){
 
+            System.out.println("entré dans le scanner");
             responseCLient = scanner.nextLine();
             if(responseCLient.equals("stop"))
                 break;
@@ -196,6 +199,7 @@ public class Client {
         public void run() {
             while(true){
                 try {
+                    System.out.println("message recu : \n");
                     System.out.println(in.readLine());
                 } catch (IOException e) {
                     e.printStackTrace();
