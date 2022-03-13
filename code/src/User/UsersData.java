@@ -40,6 +40,9 @@ public class UsersData {
         if(!subscribesTo.containsKey(message.getAuthor())){
             userList.put(message.getAuthor(), new User(message.getAuthor()));
         }
+        if(!subscribesTo.containsKey(message.getAuthor())){
+            subscribesTo.put(message.getAuthor(), new ArrayList<User>());
+        }
         for (User user: subscribesTo.get(message.getAuthor())){
             if (!messagesToUpdate.containsKey(user)){
                 messagesToUpdate.put(user, new ArrayBlockingQueue<Message>(300));

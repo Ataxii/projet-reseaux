@@ -58,6 +58,8 @@ public class NonBlockingSelectorServer {
                                 continue;
                             }
 
+
+                            //TODO: il ne reconnait pas la commande fluxconnect, sur a cause d'u espace
                             if(msg.split(" ")[0].equals("fluxconnect")){
                                 String pseudo = msg.split(" ")[1];
                                 MyFlux flux = new MyFlux(buffer, client, command, pseudo);
