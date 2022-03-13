@@ -23,8 +23,9 @@ public class Client {
         String input = scanner.nextLine();
         try{
             if(Integer.parseInt(input) == 1){
-                scanner.close();
+
                 flux(out, in, socket);
+                scanner.close();
             }
             if(Integer.parseInt(input) == 2){
 
@@ -159,13 +160,6 @@ public class Client {
                 String msg_id = request.split(" ")[2];
                 return command + " " + author + " " + msg_id + " \r\n";
 
-            case "CONNECT":
-                while(request.split(" ").length < 2 || !request.contains("author:@") || !request.contains("tag:")){
-                    System.out.println("Usage : CONNECT author:@user tag:tag");
-                    request = scanner.nextLine();
-                }
-                String rep = request.split(" ")[1];
-                return command + " " + rep + " \r\n";
 
             default:
                 System.out.println("Commande inconnu, \r\n " +

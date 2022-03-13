@@ -97,7 +97,7 @@ public class Command {
      * @return soit le message soit ERROR
      *************************************************************************************************/
     private String rcv_msg(String request) {
-        int id = Integer.parseInt(request.split("msg_id:")[1]);
+        int id = Integer.parseInt(request.split("msg_id:")[1].replace(" \n" , ""));
         if(!data.containsID(id)){
             return "ERROR";
         }
@@ -134,10 +134,8 @@ public class Command {
         if (verif){
             Message newMessage = new Message(request, id, -1);
             data.add(newMessage);
-            //TODO: faire une "classe" qui envoie la mise au jour au flux
 
             System.out.println(newMessage);
-
         }
 
         return verif;
@@ -186,6 +184,7 @@ public class Command {
         if(dataBase.size() == 0){
             return "Auncun message trouvé";
         }
+        //TODO probleme lors de la commande RCV_IDS (quand il n'y a pas d'argument)
         else {
             for(int i=0; i < Math.min(dataBase.size(), limite); i++){
                 if(dataBase.get(i) != null){
