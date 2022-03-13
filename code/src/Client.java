@@ -45,11 +45,13 @@ public class Client {
      *
      *************************************************************************************************/
     private static void flux(PrintStream out, BufferedReader in, Socket socket) throws IOException {
-        System.out.println("vous etes dans la section requete \n si vous voulez sortir faites [stop]");
+        System.out.println("vous etes dans la section flux \n si vous voulez sortir faites [stop]");
+        System.out.println("quel est votre pseudo ? \n");
         Scanner scanner =  new Scanner(System.in);
 
+        String pseudo = scanner.nextLine();
         //demande au serveur de se connecter au flux
-        out.println("fluxconnect");
+        out.println("fluxconnect " + pseudo );
         //jsute pour qu'on puisse interompre propement le flux avec une entrée utlisateur
 
         MyFlux flux = new MyFlux(in);
@@ -152,13 +154,23 @@ public class Client {
                 return command + " " + author + " " + reply_id + "\r\n" + request.split(reply_id)[1].split("\n")[0] +" ";
 
             case "REPUBLISH":
-                while(request.split(" ").length < 3 || !request.contains("author:@") || !request.contains("msg_id:")){
+                while(request.split(" ").length < 3 || !request.contains("author:@") && !request.contains("msg_id:")){
                     System.out.println("Usage : REPUBLISH author:@user msg_id:id");
                     request = scanner.nextLine();
                 }
                 author = request.split(" ")[1];
                 String msg_id = request.split(" ")[2];
                 return command + " " + author + " " + msg_id + " \r\n";
+
+
+            case "SUBSCRIBE", "UNSUBSCRIBE": //TODO : refaire la verification des commandes
+                while(request.split(" ").length < 3 || !request.contains("author:@") && !request.contains("msg_id:")){
+                    System.out.println("Usage : REPUBLISH author:@author user:@user || tag:tag");
+                    request = scanner.nextLine();
+                }
+                author = request.split(" ")[1];
+                String info = request.split(" ")[2];
+                return command + " " + author + " " + info + " \r\n";
 
 
             default:

@@ -13,7 +13,6 @@ public class NonBlockingSelectorServer {
     public static void main(String[] args) throws IOException {
         int id = 0;
 
-
         Command command = new Command();
 
         ServerSocketChannel server = ServerSocketChannel.open();
@@ -25,7 +24,6 @@ public class NonBlockingSelectorServer {
         server.register(selector, SelectionKey.OP_ACCEPT);
 
         ByteBuffer buffer = ByteBuffer.allocate(128);
-
 
         while (true) {
             int channelCount = selector.select();
@@ -60,11 +58,11 @@ public class NonBlockingSelectorServer {
                                 continue;
                             }
 
-
-                            if(msg.equals("fluxconnect")){
-                               //TODO: creation d'un Thread
+                            if(msg.split(" ")[0].equals("fluxconnect")){
+                                String pseudo = msg.split(" ")[1];
+                                MyFlux flux = new MyFlux(buffer, client, command, pseudo);
+                                flux.run();
                             }
-
 
                             ///////choix du client///////
                             String responseServ = command.getChoice(msg, id++);
@@ -74,7 +72,6 @@ public class NonBlockingSelectorServer {
                             client.write(ByteBuffer.wrap(response));
 
                             buffer.clear();
-
                         }
                     }
                     iterator.remove();

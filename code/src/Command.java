@@ -41,10 +41,47 @@ public class Command {
             case "REPUBLISH":
                 return response(republish(request, id));
 
+            case "SUBSCRIBE":
+                return response(subscribe(request));
+
+            case "UNSUBSCRIBE":
+                return response(unsubscribe(request));
+
             default:
                 return "Command not found";
         }
     }
+
+
+    /*************************************************************************************************
+     * un utilisateur s'abonne à un autre
+     * @param request la request du client
+     * @return vrai ou faux
+     *************************************************************************************************/
+    private boolean subscribe(String request) {
+        String author = request.split("author:@")[1].split(" ")[0];
+        String user = request.split("user:@")[1].split(" ")[0];
+
+        if(!usersData.userList.containsKey(user)){
+            return false;
+        }
+        usersData.addSubscribe(author, usersData.getUser(user));
+
+        return true;
+    }
+
+
+    /*************************************************************************************************
+     * un utilisateur se desabonne à un autre
+     * @param request la request du client
+     * @return vrai ou faux
+     *************************************************************************************************/
+    private boolean unsubscribe(String request) {
+        return false;
+    }
+
+
+
 
     /*************************************************************************************************
      * ajout d'un nouveau message qui reprend celui de id mais en modifiant l'author et l'id
@@ -134,7 +171,7 @@ public class Command {
         if (verif){
             Message newMessage = new Message(request, id, -1);
             data.add(newMessage);
-
+            usersData.addMessage(newMessage);
             System.out.println(newMessage);
         }
 

@@ -1,20 +1,21 @@
 package User;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 
 public class User {
     public String userName;
-    private ArrayList<User> subscribes;
+    private HashMap<String, User> subscribes;
     private HashSet<String> hashtags;
 
     public User(String userName) {
         this.userName = userName;
-        this.subscribes = new ArrayList<>();
+        this.subscribes = new HashMap<String, User>();
         this.hashtags = new HashSet<>();
     }
 
-    public ArrayList<User> getSubscribe() {
+    public HashMap<String, User> getSubscribe() {
         return subscribes;
     }
 
@@ -23,10 +24,10 @@ public class User {
     }
 
     public boolean addSubscribe(User user){
-        if (subscribes.contains(user)){
+        if (subscribes.containsKey(user.userName)){
             return false;
         }
-        subscribes.add(user);
+        subscribes.put(user.userName, user);
         return true;
     }
 
