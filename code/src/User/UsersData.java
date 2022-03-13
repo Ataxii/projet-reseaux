@@ -36,16 +36,16 @@ public class UsersData {
      * @param message
      */
     public void addMessage(Message message){
-        if(subscribesTo.containsKey(message.getAuthor())){
-            for (User user:
-            subscribesTo.get(message.getAuthor())){
-                if (!messagesToUpdate.containsKey(user)){
-                    messagesToUpdate.put(user, new ArrayBlockingQueue<Message>(300));
-                }
-                messagesToUpdate.get(user).add(message);
-            }
-        }
 
+        if(!subscribesTo.containsKey(message.getAuthor())){
+            userList.put(message.getAuthor(), new User(message.getAuthor()));
+        }
+        for (User user: subscribesTo.get(message.getAuthor())){
+            if (!messagesToUpdate.containsKey(user)){
+                messagesToUpdate.put(user, new ArrayBlockingQueue<Message>(300));
+            }
+            messagesToUpdate.get(user).add(message);
+        }
     }
 
     /**

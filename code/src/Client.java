@@ -165,7 +165,7 @@ public class Client {
 
             case "SUBSCRIBE", "UNSUBSCRIBE": //TODO : refaire la verification des commandes
                 while(request.split(" ").length < 3 || !request.contains("author:@") && !request.contains("msg_id:")){
-                    System.out.println("Usage : REPUBLISH author:@author user:@user || tag:tag");
+                    System.out.println("Usage : (UN)SUBSCRIBE author:@author user:@user || tag:tag");
                     request = scanner.nextLine();
                 }
                 author = request.split(" ")[1];
@@ -180,7 +180,7 @@ public class Client {
                         "Usage : RCV_MSG msg_id:id \r\n" +
                         "Usage : REPLY author:@user reply_to_id:id Message.Message \r\n " +
                         "Usage : REPUBLISH author:@user msg_id:id \r\n" +
-                        "Usage : CONNECT author:@user tag:tag");
+                        "Usage : (UN)SUBSCRIBE author:@author user:@user || tag:tag");
                 return null;
         }
     }

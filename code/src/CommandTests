@@ -1,0 +1,6 @@
+PUBLISH author:@sa salut
+PUBLISH author:@to salut
+
+RCV_MSG msg_id:0
+
+SUBSCRIBE author:@sa user:@to
