@@ -134,6 +134,8 @@ public class Command {
         if (verif){
             Message newMessage = new Message(request, id, -1);
             data.add(newMessage);
+            //TODO: faire une "classe" qui envoie la mise au jour au flux
+
             System.out.println(newMessage);
 
         }

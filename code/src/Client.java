@@ -16,40 +16,61 @@ public class Client {
 
         PrintStream out = new PrintStream(socket.getOutputStream());
 
+        //si jamais le client ecrit pas un chiffre je sais pas comment faire a part de faire un try catch
 
+        System.out.println("Que veux tu faire ? /n connection au flux (1) : envoie de requete (2)");
+        Scanner scanner =  new Scanner(System.in);
+        String input = scanner.nextLine();
+        try{
+            if(Integer.parseInt(input) == 1){
+                scanner.close();
+                flux(out, in, socket);
+            }
+            if(Integer.parseInt(input) == 2){
+
+                request(out, in, socket);
+                scanner.close();
+            }
+            else System.out.println("connection au flux (1) : envoie de requete (2)");
+        }catch (Exception e){
+            System.out.println("connection au flux (1) : envoie de requete (2)");
+        }
+
+
+    }
+
+    /**************************************************************************************************
+     * permet de faire le passage en mode flux et d'eviter de faire un nouveau client
+     *
+     *************************************************************************************************/
+    private static void flux(PrintStream out, BufferedReader in, Socket socket) throws IOException {
+        System.out.println("vous etes dans la section requete \n si vous voulez sortir faites [stop]");
         Scanner scanner =  new Scanner(System.in);
 
+        //demande au serveur de se connecter au flux
+        out.println("fluxconnect");
+        //jsute pour qu'on puisse interompre propement le flux avec une entrée utlisateur
 
-        //si jamais le client ecrit pas un chiffre je sais pas comment faire a part de faire un try catch
-        while(true){
-            System.out.println("Que veux tu faire ? /n connection au flux (1) : envoie de requete (2)");
-            String input = scanner.nextLine();
-            try{
-                if(Integer.parseInt(input) == 1){
-                    flux();
-                }
-                if(Integer.parseInt(input) == 2){
-                    request(out, in, socket);
-                }
-                else System.out.println("connection au flux (1) : envoie de requete (2)");
-            }catch (Exception e){
-                System.out.println("connection au flux (1) : envoie de requete (2)");
-            }
+        MyFlux flux = new MyFlux(in);
+        flux.run();
+        String responseCLient;
+        while(scanner.hasNextLine()){
+
+            responseCLient = scanner.nextLine();
+            if(responseCLient.equals("stop"))
+                break;
         }
-    }
-
-    private static void flux() {
 
     }
 
 
-    /**
+    /**************************************************************************************************
      * gestion de la recuperation de la commande du client et de l'envoi au serveur
      * @param out envoie de messages
      * @param in recection de message
      * @param socket de connection au serveur
      * @throws IOException pour readLine
-     */
+     *************************************************************************************************/
     public static void request(PrintStream out, BufferedReader in, Socket socket) throws IOException {
 
         System.out.println("vous etes dans la section requete \n");
@@ -85,13 +106,13 @@ public class Client {
     }
 
 
-    /**
+    /**************************************************************************************************
      * regarde si la commande est bien ecrite
      *      si [] alors on peut ne pas le mettre sinon ca doit y etre
      * @param request l'entrée de l'utilisateur
      * @param command la commande invoqué par l'utisateur
      * @return le bon format en fonction de la requete
-     */
+     *************************************************************************************************/
     public static String command_format(String request, String command){
         Scanner scanner =  new Scanner(System.in);
 
@@ -138,14 +159,42 @@ public class Client {
                 String msg_id = request.split(" ")[2];
                 return command + " " + author + " " + msg_id + " \r\n";
 
+            case "CONNECT":
+                while(request.split(" ").length < 2 || !request.contains("author:@") || !request.contains("tag:")){
+                    System.out.println("Usage : CONNECT author:@user tag:tag");
+                    request = scanner.nextLine();
+                }
+                String rep = request.split(" ")[1];
+                return command + " " + rep + " \r\n";
+
             default:
                 System.out.println("Commande inconnu, \r\n " +
                         "Usage : PUBLISH author:@user Message.Message \r\n" +
                         "Usage : RCV_IDS [author:@user] [tag:#tag] [since_id:id] [limit:n] \r\n" +
                         "Usage : RCV_MSG msg_id:id \r\n" +
                         "Usage : REPLY author:@user reply_to_id:id Message.Message \r\n " +
-                        "Usage : REPUBLISH author:@user msg_id:id \r\n");
+                        "Usage : REPUBLISH author:@user msg_id:id \r\n" +
+                        "Usage : CONNECT author:@user tag:tag");
                 return null;
+        }
+    }
+
+    public static class MyFlux implements Runnable{
+
+        BufferedReader in;
+        public MyFlux(BufferedReader in){
+            this.in = in;
+        }
+
+        @Override
+        public void run() {
+            while(true){
+                try {
+                    System.out.println(in.readLine());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 }

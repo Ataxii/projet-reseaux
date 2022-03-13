@@ -12,7 +12,9 @@ import java.util.Set;
 public class NonBlockingSelectorServer {
     public static void main(String[] args) throws IOException {
         int id = 0;
-        Command content = new Command();
+
+
+        Command command = new Command();
 
         ServerSocketChannel server = ServerSocketChannel.open();
         server.socket().bind(new InetSocketAddress(12345));
@@ -23,6 +25,7 @@ public class NonBlockingSelectorServer {
         server.register(selector, SelectionKey.OP_ACCEPT);
 
         ByteBuffer buffer = ByteBuffer.allocate(128);
+
 
         while (true) {
             int channelCount = selector.select();
@@ -38,7 +41,7 @@ public class NonBlockingSelectorServer {
                         SocketChannel client = server.accept();
                         client.configureBlocking(false);
                         SelectionKey newkey = client.register(selector, SelectionKey.OP_READ, client.socket().getPort());
-                        newkey.attach(0);
+                        newkey.attach(false);
                     } else if (key.isReadable()) {
                         SocketChannel client = (SocketChannel) key.channel();
                         if (client.read(buffer) < 0) {
@@ -48,18 +51,25 @@ public class NonBlockingSelectorServer {
                             String msg = new String(buffer.array(), 0,  buffer.position());
 
                             //verification de la fermeture du serveur
-                            if(msg.contains("ACK")){
+                            //requete envoyé depuis le client
+                            if(msg.equals("ACK")){
                                 //System.out.println("Connexion close");
                                 client.write(ByteBuffer.wrap("close".getBytes(StandardCharsets.UTF_8)));
                                 client.close();
                                 buffer.clear();
                                 continue;
                             }
-                            String responseServ = content.getChoice(msg, id++); //choix du client
 
+
+                            if(msg.equals("fluxconnect")){
+                               //TODO: creation d'un Thread
+                            }
+
+
+                            ///////choix du client///////
+                            String responseServ = command.getChoice(msg, id++);
 
                             buffer.flip();
-                            key.attach(Integer.parseInt(key.attachment().toString())+1);
                             byte[] response = (responseServ + "\n").getBytes(StandardCharsets.UTF_8);
                             client.write(ByteBuffer.wrap(response));
 
