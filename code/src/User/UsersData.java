@@ -53,7 +53,7 @@ public class UsersData {
      */
     public void newUser(User user){
         if(!userList.containsKey(user.userName)){
-            userList.put(user.userName, new User(user.userName));
+            userList.put(user.userName, user);
         }
         if(!subscribesTo.containsKey(user.userName)){
             subscribesTo.put(user.userName, new ArrayList<User>());

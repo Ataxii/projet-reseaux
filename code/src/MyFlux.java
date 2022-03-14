@@ -7,7 +7,7 @@ import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 
-public class MyFlux implements Runnable {
+public class MyFlux extends Thread {
 
     private ByteBuffer buffer;
     private SocketChannel client;
@@ -31,8 +31,6 @@ public class MyFlux implements Runnable {
 
                 //si il n'y a plus de Message dans la liste pour un certain utilisateur, la list bloquera
 
-
-                //TODO : il y a un probleme avec le .get(user), la liste qui lui est lié n'existe pas (return null)
                 User user = command.usersData.getUser(pseudo);
                 Message message = command.usersData.messagesToUpdate.get(user).take();
 

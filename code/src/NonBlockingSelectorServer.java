@@ -8,6 +8,9 @@ import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class NonBlockingSelectorServer {
     public static void main(String[] args) throws IOException {
@@ -59,9 +62,11 @@ public class NonBlockingSelectorServer {
                             }
 
                             if(msg.split(" ")[0].equals("fluxconnect")){
+                                ExecutorService executor;
+                                executor = Executors.newCachedThreadPool();
                                 String pseudo = msg.split(" ")[1].replace("\n", "").replace(" ", "");
-                                MyFlux flux = new MyFlux(buffer, client, command, pseudo);
-                                flux.run();
+                                executor.execute(new MyFlux(buffer, client, command, pseudo));
+
                             }
                             else {
                                 ///////choix du client///////

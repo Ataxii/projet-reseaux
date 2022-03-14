@@ -55,6 +55,7 @@ public class Client {
         //jsute pour qu'on puisse interompre propement le flux avec une entrée utlisateur
 
         //TODO : corriger le probleme, le thread n'est pas mis sur le coté pour laisser place au scanner
+        // (potentiel solution : faire un pool de thred pour que lexecution continue)
         MyFlux flux = new MyFlux(in);
         flux.run();
         String responseCLient;
@@ -199,7 +200,6 @@ public class Client {
         public void run() {
             while(true){
                 try {
-                    System.out.println("message recu : \n");
                     System.out.println(in.readLine());
                 } catch (IOException e) {
                     e.printStackTrace();
