@@ -1,6 +1,8 @@
 import java.io.*;
 import java.net.Socket;
 import java.util.Scanner;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Client {
     public static void main(String[] args) throws IOException {
@@ -20,6 +22,8 @@ public class Client {
 
         System.out.println("Que veux tu faire ? /n connection au flux (1) : envoie de requete (2)");
         Scanner scanner =  new Scanner(System.in);
+        System.out.print("-> ");
+
         String input = scanner.nextLine();
         try{
             if(Integer.parseInt(input) == 1){
@@ -46,28 +50,35 @@ public class Client {
      *************************************************************************************************/
     private static void flux(PrintStream out, BufferedReader in, Socket socket) throws IOException {
         System.out.println("vous etes dans la section flux \n si vous voulez sortir faites [stop]");
-        System.out.println("quel est votre pseudo ? \n");
-        Scanner scanner =  new Scanner(System.in);
 
+        Scanner scanner =  new Scanner(System.in);
+        System.out.print("quel est votre pseudo ?\n -> ");
         String pseudo = scanner.nextLine();
         //demande au serveur de se connecter au flux
         out.println("fluxconnect " + pseudo );
         //jsute pour qu'on puisse interompre propement le flux avec une entrée utlisateur
 
-        //TODO : corriger le probleme, le thread n'est pas mis sur le coté pour laisser place au scanner
-        // (potentiel solution : faire un pool de thred pour que lexecution continue)
+        //gestion de l'affichage appart
+        ExecutorService executor;
+        executor = Executors.newCachedThreadPool();
         MyFlux flux = new MyFlux(in);
-        flux.run();
+        executor.execute(flux);
+
+
         String responseCLient;
         System.out.println("passage du thread");
         while(scanner.hasNextLine()){
 
             System.out.println("entré dans le scanner");
             responseCLient = scanner.nextLine();
-            if(responseCLient.equals("stop"))
+            if(responseCLient.equals("stop")){
+                out.println("ACK");
+                flux.stop();
+                out.close();
+                socket.close();
                 break;
+            }
         }
-
     }
 
 
@@ -82,34 +93,34 @@ public class Client {
 
         System.out.println("vous etes dans la section requete \n");
         Scanner scanner =  new Scanner(System.in);
-
+        System.out.print("-> ");
         //envoie du message
-        while(scanner.hasNextLine()){
 
-            String data = scanner.nextLine();
+        String data = scanner.nextLine();
 
-            String message_formated = command_format(data, data.split(" ")[0]);
+        String message_formated = command_format(data, data.split(" ")[0]);
 
-            while (message_formated == null){
-                data = scanner.nextLine();
-                message_formated = command_format(data, data.split(" ")[0]);
-            }
-            out.println(message_formated);
-            String response;
-            while(true){
-                response = in.readLine();
-                if(response != null)
-                    break;
-            }
-            System.out.println(response);
+        while (message_formated == null){
+            System.out.print("-> ");
+            data = scanner.nextLine();
 
-            out.println("ACK");
-
-            in.close();
-            out.close();
-            socket.close();
-            return;
+            message_formated = command_format(data, data.split(" ")[0]);
         }
+        out.println(message_formated);
+        String response;
+        while(true){
+            response = in.readLine();
+            if(response != null)
+                break;
+        }
+        System.out.println(response);
+
+        out.println("ACK");
+
+        in.close();
+        out.close();
+        socket.close();
+        return;
     }
 
 
@@ -120,47 +131,48 @@ public class Client {
      * @param command la commande invoqué par l'utisateur
      * @return le bon format en fonction de la requete
      *************************************************************************************************/
-    public static String command_format(String request, String command){
-        Scanner scanner =  new Scanner(System.in);
+    public static String command_format(String request, String command) {
+        Scanner scanner = new Scanner(System.in);
 
-        switch(command){
+
+        switch (command) {
             case "PUBLISH":
-                while(request.split(" ").length < 3 || !request.contains("author:@")){
+                if (request.split(" ").length < 3 || !request.contains("author:@")) {
                     System.out.println("Usage : PUBLISH author:@user Message.Message");
-                    request = scanner.nextLine();
+                    return null;
                 }
                 String pseudo = request.split(" ")[1];
-                return command + " " + pseudo + "\r\n" + request.split(pseudo)[1].split("\n")[0] +" ";
+                return command + " " + pseudo + "\r\n" + request.split(pseudo)[1].split("\n")[0] + " ";
 
             case "RCV_IDS":
-                while(request.split(" ").length < 1 || (request.contains("author:") && !request.contains("author:@"))){
+                if (request.split(" ").length < 1 || (request.contains("author:") && !request.contains("author:@"))) {
 
                     System.out.println("Usage : RCV_IDS [author:@user] [tag:#tag] [since_id:id] [limit:n]");
-                    request = scanner.nextLine();
+                    return null;
 
                 }
                 return request + " ";
 
             case "RCV_MSG":
-                while(request.split(" ").length == 3 || !request.contains("msg_id:")){
+                if (request.split(" ").length == 3 || !request.contains("msg_id:")) {
                     System.out.println("Usage : RCV_MSG msg_id:id");
-                    request = scanner.nextLine();
+                    return null;
                 }
-                return request+ " ";
+                return request + " ";
 
             case "REPLY":
-                while(request.split(" ").length < 4 || !request.contains("author:@") || !request.contains("reply_to_id:") ){
-                    System.out.println("Usage : REPLY author:@user reply_to_id:id msg ");
-                    request = scanner.nextLine();
+                if (request.split(" ").length < 4 || !request.contains("author:@") || !request.contains("reply_to_id:")) {
+                    System.out.println("Usage : REPLY author:@user reply_to_id:id msg");
+                    return null;
                 }
                 String author = request.split(" ")[1];
                 String reply_id = request.split(" ")[2];
-                return command + " " + author + " " + reply_id + "\r\n" + request.split(reply_id)[1].split("\n")[0] +" ";
+                return command + " " + author + " " + reply_id + "\r\n" + request.split(reply_id)[1].split("\n")[0] + " ";
 
             case "REPUBLISH":
-                while(request.split(" ").length < 3 || !request.contains("author:@") && !request.contains("msg_id:")){
+                if (request.split(" ").length < 3 || !request.contains("author:@") && !request.contains("msg_id:")) {
                     System.out.println("Usage : REPUBLISH author:@user msg_id:id");
-                    request = scanner.nextLine();
+                    return null;
                 }
                 author = request.split(" ")[1];
                 String msg_id = request.split(" ")[2];
@@ -168,9 +180,9 @@ public class Client {
 
 
             case "SUBSCRIBE", "UNSUBSCRIBE": //TODO : refaire la verification des commandes
-                while(request.split(" ").length < 3 || !request.contains("author:@") && !request.contains("msg_id:")){
+                if (request.split(" ").length < 3 || !request.contains("author:@") && !request.contains("tag:")) {
                     System.out.println("Usage : (UN)SUBSCRIBE author:@author user:@user || tag:tag");
-                    request = scanner.nextLine();
+                    return null;
                 }
                 author = request.split(" ")[1];
                 String info = request.split(" ")[2];
@@ -187,10 +199,12 @@ public class Client {
                         "Usage : (UN)SUBSCRIBE author:@author user:@user || tag:tag");
                 return null;
         }
+
     }
 
     public static class MyFlux implements Runnable{
 
+        boolean kill = false;
         BufferedReader in;
         public MyFlux(BufferedReader in){
             this.in = in;
@@ -198,13 +212,18 @@ public class Client {
 
         @Override
         public void run() {
-            while(true){
+            while(!kill){
                 try {
                     System.out.println(in.readLine());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
+        }
+
+        public void stop() throws IOException {
+            in.close();
+            kill = true;
         }
     }
 }

@@ -8,7 +8,6 @@ import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -54,7 +53,7 @@ public class NonBlockingSelectorServer {
                             //verification de la fermeture du serveur
                             //requete envoyé depuis le client
                             if(msg.equals("ACK")){
-                                //System.out.println("Connexion close");
+                                System.out.println("Client deconected");
                                 client.write(ByteBuffer.wrap("close".getBytes(StandardCharsets.UTF_8)));
                                 client.close();
                                 buffer.clear();
@@ -76,7 +75,6 @@ public class NonBlockingSelectorServer {
                                 client.write(ByteBuffer.wrap(response));
 
                             }
-
 
                             buffer.clear();
                         }

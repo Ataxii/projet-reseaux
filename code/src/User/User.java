@@ -1,6 +1,5 @@
 package User;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -31,12 +30,20 @@ public class User {
         return true;
     }
 
+    public void delSubscribe(User user){
+        subscribes.remove(user.userName);
+    }
+
     public boolean addHashtag(String hashtag){
         if (hashtags.contains(hashtag)){
             return false;
         }
         hashtags.add(hashtag);
         return true;
+    }
+
+    public void dekHashtag(String hashtag){
+        hashtags.remove(hashtag);
     }
 
     @Override

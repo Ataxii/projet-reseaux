@@ -14,7 +14,6 @@ public class UsersData {
      *      -utilisateur -> abonné
      */
 
-
     //liste d'utilisateur <nom, User> dans User on a ses abonnement
     public HashMap<String, User> userList;
 
@@ -32,24 +31,21 @@ public class UsersData {
 
     /**
      * un nouveau message arrive dans la TL, il faut donc l'ajouter a tout ce qui ont comme abonnement l'author de ce tweet
-     *
-     * @param message
+     *tous les utilisateur abonné à l'autheur de se message se verront ajouter le message dans message to update
+     * @param message a ajouter
      */
     public void addMessage(Message message){
 
         newUser(new User(message.getAuthor()));
 
         for (User user: subscribesTo.get(message.getAuthor())){
-            if (!messagesToUpdate.containsKey(user)){
-                messagesToUpdate.put(user, new ArrayBlockingQueue<Message>(300));
-            }
             messagesToUpdate.get(user).add(message);
         }
     }
 
     /**
-     * regarde si il faut ajouter le user de partout pour eviter les problemes de nullPointerException
-     * @param user l'utilisateur qui va etre ajouté
+     * regarde s'il faut ajouter le User de partout pour éviter les problèmes de nullPointerException
+     * @param user l'utilisateur qui va être ajouté
      */
     public void newUser(User user){
         if(!userList.containsKey(user.userName)){
@@ -59,40 +55,32 @@ public class UsersData {
             subscribesTo.put(user.userName, new ArrayList<User>());
         }
         if(!messagesToUpdate.containsKey(user)){
-            messagesToUpdate.put(user, new ArrayBlockingQueue<Message>(50));
+            messagesToUpdate.put(user, new ArrayBlockingQueue<Message>(300));
         }
     }
 
     /**
      * On part du principe que quelqu'un qui veut ajouter une autre personne peut ne pas etre inscrite mais l'autre
      * personne est forcement inscrite
-     * @param name personne voulant ajouter quelqu'un
-     * @param user la personne qui va etre ajouter a la liste de name
+     * @param user1 personne voulant s'abonner à quelqu'un
+     * @param newFriend la personne qui va etre ajouter a la liste de name
      */
-    public void addSubscribe(String name, User user){
+    public void addSubscribe(String user1, User newFriend){
 
-        //par précaution
-        newUser(user);
-        newUser(new User(name));
+        newUser(newFriend);
+        newUser(new User(user1));
 
-        if (userList.containsKey(name)){
-            userList.get(name).addSubscribe(user);
-            if (!subscribesTo.containsKey(user.userName)){
-                subscribesTo.put(user.userName, new ArrayList());
-            }
-            subscribesTo.get(user.userName).add(userList.get(name));
+        userList.get(user1).addSubscribe(newFriend);
+        subscribesTo.get(newFriend.userName).add(userList.get(user1));
 
-        }else {
-            User newUser = new User(name);
-            userList.put(name, newUser);
-            newUser.addSubscribe(user);
-            userList.put(user.userName, userList.get(name));
-            if (!subscribesTo.containsKey(user.userName)){
-                subscribesTo.put(user.userName, new ArrayList());
-            }
-            subscribesTo.get(user.userName).add(userList.get(name));
+    }
 
-        }
+    public void delSubscribe(String user1, User oldFriend){
+        newUser(oldFriend);
+        newUser(new User(user1));
+
+        userList.get(user1).delSubscribe(oldFriend);
+        subscribesTo.get(oldFriend.userName).remove(userList.get(user1));
     }
 
 

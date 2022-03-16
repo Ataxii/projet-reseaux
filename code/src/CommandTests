@@ -1,6 +1,6 @@
 PUBLISH author:@sa salut
 PUBLISH author:@to salut
 
-RCV_MSG msg_id:0
+RCV_MSG msg_id:7
 
 SUBSCRIBE author:@sa user:@to

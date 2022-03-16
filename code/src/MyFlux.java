@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
-import java.util.Iterator;
 
 public class MyFlux extends Thread {
 
@@ -26,10 +25,7 @@ public class MyFlux extends Thread {
         try{
             while (true){//regarde si il y a des message a envoyer au client
                 //si oui on les envoie
-                //si non TODO : faire une sortie (le client envoie exit)
-
-
-                //si il n'y a plus de Message dans la liste pour un certain utilisateur, la list bloquera
+                //si non il bloque
 
                 User user = command.usersData.getUser(pseudo);
                 Message message = command.usersData.messagesToUpdate.get(user).take();
@@ -42,11 +38,9 @@ public class MyFlux extends Thread {
                 }
 
                 buffer.clear();
-
             }
         }catch (Exception e){
             System.out.println(e);
         }
-
     }
 }
