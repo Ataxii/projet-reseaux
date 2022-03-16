@@ -25,7 +25,7 @@ public class UsersData {
     public HashMap<String, ArrayList<User>> subscribesTo;
 
     public UsersData() {
-        this.userList = new HashMap<String, User>();
+        this.userList = new HashMap<String, User>(); // Table
         this.messagesToUpdate = new ConcurrentHashMap<User, ArrayBlockingQueue<Message>>();
         this.subscribesTo = new HashMap<>();
     }

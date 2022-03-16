@@ -7,7 +7,7 @@ import java.util.Objects;
 
 public class MessagesData {
 
-    public HashMap<Integer, Message> messages;
+    public HashMap<Integer, Message> messages; // Table message id PK + string message
 
     public MessagesData() {
         messages = new HashMap<>();
