@@ -85,7 +85,7 @@ public class Connexion {
         StringBuilder response= new StringBuilder();
         try (Connection conn = DriverManager.getConnection(URL);
              Statement stmt  = conn.createStatement();
-             ResultSet rs    = stmt.executeQuery(sql)){
+             ResultSet rs    = stmt.executeQuery(sql)) {
             while (rs.next()) {
                 response.append(rs.getInt("id")).append("\t")
                         .append(rs.getInt("id_message")).append("\t")

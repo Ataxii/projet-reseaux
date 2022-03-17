@@ -179,7 +179,7 @@ public class Client {
                 return command + " " + author + " " + msg_id + " \r\n";
 
 
-            case "SUBSCRIBE", "UNSUBSCRIBE": //TODO : refaire la verification des commandes
+            case "SUBSCRIBE", "UNSUBSCRIBE":
                 if (request.split(" ").length < 3 || !request.contains("author:@") && !request.contains("tag:")) {
                     System.out.println("Usage : (UN)SUBSCRIBE author:@author user:@user || tag:tag");
                     return null;

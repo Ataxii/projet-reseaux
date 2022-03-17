@@ -13,21 +13,19 @@ public class Command {
     public Command() {
     }
 
-    //TODO: faire un message d'erreur pour chaque probleme ERROR + id not found ....
-
     /**************************************************************************************************
      * ce qui fait le choix par rapport à la requette du client
      * @param request le message du client
      * @param id du message
      * @return message d'erreur ou de validation
      *************************************************************************************************/
-    public String getChoice(String request, int id){
+    public String getChoice(String request, int id, NonBlockingSelectorServer server){
         String[] data = request.split(" ");
         String command = data[0];
 
         switch(command){
             case "PUBLISH":
-                return response(publish(request, id));
+                return response(publish(request, id, server));
 
             case "RCV_IDS":
                 return rcv_ids(request);
@@ -36,10 +34,10 @@ public class Command {
                 return rcv_msg(request);
 
             case "REPLY":
-                return reply_to_id(request, id);
+                return reply_to_id(request, id, server);
 
             case "REPUBLISH":
-                return response(republish(request, id));
+                return response(republish(request, id, server));
 
             case "SUBSCRIBE":
                 return response(subscribe(request));
@@ -59,15 +57,20 @@ public class Command {
      * @return vrai ou faux
      *************************************************************************************************/
     private boolean subscribe(String request) {
-        //TODO faire un test pour savoir si le client veut se desabo d'un user ou d'un hashtag
         String author = request.split("author:@")[1].split(" ")[0].replace(" ", "").replace("\n", "");
-        String user = request.split("user:@")[1].split(" ")[0].replace(" ", "").replace("\n", "");
-
-        if(!usersData.userList.containsKey(user)){
+        if(!usersData.userList.containsKey(author)){
             return false;
         }
-        usersData.addSubscribe(author, usersData.getUser(user));
+        if(request.contains("user:@")){
+            String user = request.split("user:@")[1].split(" ")[0].replace(" ", "").replace("\n", "");
 
+            usersData.addSubscribe(author, usersData.getUser(user));
+
+        }else {
+            String tag = request.split("tag:")[1].split(" ")[0].replace(" ", "").replace("\n", "");
+
+            usersData.addSubscribe(author, tag);
+        }
         return true;
     }
 
@@ -79,12 +82,21 @@ public class Command {
      *************************************************************************************************/
     private boolean unsubscribe(String request) {
         String author = request.split("author:@")[1].split(" ")[0].replace(" ", "").replace("\n", "");
-        String user = request.split("user:@")[1].split(" ")[0].replace(" ", "").replace("\n", "");
 
-        if(!usersData.userList.containsKey(user)){
+        if(!usersData.userList.containsKey(author)){
             return false;
         }
-        usersData.delSubscribe(author, usersData.getUser(user));
+
+        if(request.contains("user:@")){
+            String user = request.split("user:@")[1].split(" ")[0].replace(" ", "").replace("\n", "");
+
+            usersData.delSubscribe(author, usersData.getUser(user));
+
+        }else {
+            String tag = request.split("tag:")[1].split(" ")[0].replace(" ", "").replace("\n", "");
+
+            usersData.delSubscribe(author, tag);
+        }
 
         return true;
     }
@@ -94,9 +106,10 @@ public class Command {
      * ajout d'un nouveau message qui reprend celui de id mais en modifiant l'author et l'id
      * @param request la request du client
      * @param initial est le nouvelle id
+     * @param server pour incrementer l'id
      * @return vrai ou faux
      *************************************************************************************************/
-    private Boolean republish(String request, int initial) {
+    private Boolean republish(String request, int initial, NonBlockingSelectorServer server) {
         int id = Integer.parseInt(request.split("msg_id:")[1].split(" ")[0].replace("\r\n", ""));
 
         String author = request.split("author:@")[1].split(" ")[0].replace("\r\n", "");
@@ -107,6 +120,7 @@ public class Command {
         Message newMessage = new Message(initial, author, originalMessage.getHashtag(), originalMessage.getMessage(), true, -1);
         data.add(newMessage);
         System.out.println(newMessage);
+        server.id++;
         return true;
     }
 
@@ -114,9 +128,10 @@ public class Command {
      *
      * @param request du client
      * @param initId l'id que l'on va donner a la reply pour en faire un nouveau message
+     * @param server pour incrementer l'id
      * @return message d'erreur ou de validation
      *************************************************************************************************/
-    private String reply_to_id(String request, int initId) {
+    private String reply_to_id(String request, int initId, NonBlockingSelectorServer server) {
 
         //l'id du message au quel on repond
 
@@ -129,6 +144,7 @@ public class Command {
             data.responseId(id).addResponse(newMessage);
             data.add(newMessage);
             System.out.println(newMessage);
+            server.id++;
             return "OK";
         }
         return "ERROR";
@@ -164,9 +180,10 @@ public class Command {
      * fonction qui verifie et publie le message par l'utilisateur
      * @param request tout le message envoyé par le client
      * @param id du client
+     * @param server pour incrementer l'id
      * @return un message d'erreur ou de validation
      *************************************************************************************************/
-    public Boolean publish(String request, int id){
+    public Boolean publish(String request, int id, NonBlockingSelectorServer server){
 
         boolean verif = true;
         String entete = request.split("\r\n")[0];
@@ -180,6 +197,7 @@ public class Command {
             data.add(newMessage);
             usersData.addMessage(newMessage);
             System.out.println(newMessage);
+            server.id++;
         }
 
         return verif;

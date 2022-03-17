@@ -42,12 +42,17 @@ public class User {
         return true;
     }
 
-    public void dekHashtag(String hashtag){
+    public void delHashtag(String hashtag){
         hashtags.remove(hashtag);
     }
 
     @Override
     public String toString() {
         return userName ;
+    }
+
+    @Override
+    public int hashCode() {
+        return userName.hashCode();
     }
 }

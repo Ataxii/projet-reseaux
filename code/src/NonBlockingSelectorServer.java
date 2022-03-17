@@ -12,8 +12,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class NonBlockingSelectorServer {
-    public static void main(String[] args) throws IOException {
-        int id = 0;
+    public int id = 0;
+
+    public void execute() throws IOException {
 
         Command command = new Command();
 
@@ -69,13 +70,12 @@ public class NonBlockingSelectorServer {
                             }
                             else {
                                 ///////choix du client///////
-                                String responseServ = command.getChoice(msg, id++);
+                                String responseServ = command.getChoice(msg, id, this);
                                 buffer.flip();
                                 byte[] response = (responseServ + "\n").getBytes(StandardCharsets.UTF_8);
                                 client.write(ByteBuffer.wrap(response));
 
                             }
-
                             buffer.clear();
                         }
                     }
