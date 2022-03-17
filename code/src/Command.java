@@ -204,6 +204,7 @@ public class Command {
         int limite = 5; //valeur par defaut
 
         ArrayList<Message> dataBase = new ArrayList<>();
+
         if(request.contains("since_id:")){
             id = Integer.parseInt(request.split("id:")[1].split(" ")[0]);
             dataBase = data.findId(id);
@@ -215,8 +216,8 @@ public class Command {
             System.out.println(dataBase);
         }
 
-        if(request.contains("#")){
-            tag = request.split("#")[1].split(" ")[0];
+        if(request.contains("tag:#")){
+            tag = request.split("tag:#")[1].split(" ")[0];
             dataBase = data.findTag(dataBase, tag);
         }
 
@@ -225,15 +226,16 @@ public class Command {
             dataBase = data.findLimite(dataBase, limite);
         }
 
-        if(dataBase.size() == 0){
+        boolean b = request.contains("author:") || request.contains("since_id:") || request.contains("tag:#") || request.contains("limite:");
+        if(dataBase.size() == 0 && b){
             return "Auncun message trouvé";
         }
-        //TODO probleme lors de la commande RCV_IDS (quand il n'y a pas d'argument)
+
         else {
-            for(int i=0; i < Math.min(dataBase.size(), limite); i++){
-                if(dataBase.get(i) != null){
-                    result.add(dataBase.get(i).getMessage().replace("\n",""));
-                }
+            dataBase = data.findLimite(dataBase, limite);
+            for (Message message :
+                    dataBase) {
+                result.add(message.getMessage().replace("\n", ""));
             }
             return result.toString();
         }

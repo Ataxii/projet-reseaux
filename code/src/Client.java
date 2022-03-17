@@ -190,13 +190,13 @@ public class Client {
 
 
             default:
-                System.out.println("Commande inconnu, \r\n " +
-                        "Usage : PUBLISH author:@user Message.Message \r\n" +
-                        "Usage : RCV_IDS [author:@user] [tag:#tag] [since_id:id] [limit:n] \r\n" +
-                        "Usage : RCV_MSG msg_id:id \r\n" +
-                        "Usage : REPLY author:@user reply_to_id:id Message.Message \r\n " +
-                        "Usage : REPUBLISH author:@user msg_id:id \r\n" +
-                        "Usage : (UN)SUBSCRIBE author:@author user:@user || tag:tag");
+                System.out.println("Commande inconnu, \r\n" +
+                        "   Usage : PUBLISH author:@user Message:message \r\n" +
+                        "   Usage : RCV_IDS [author:@user] [tag:#tag] [since_id:id] [limit:n] \r\n" +
+                        "   Usage : RCV_MSG msg_id:id \r\n" +
+                        "   Usage : REPLY author:@user reply_to_id:id Message:message \r\n" +
+                        "   Usage : REPUBLISH author:@user msg_id:id \r\n" +
+                        "   Usage : (UN)SUBSCRIBE author:@author user:@user || tag:tag");
                 return null;
         }
 

@@ -3,4 +3,6 @@ PUBLISH author:@to salut
 
 RCV_MSG msg_id:7
 
+
+RCV_IDS
 SUBSCRIBE author:@sa user:@to
