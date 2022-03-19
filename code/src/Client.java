@@ -108,11 +108,9 @@ public class Client {
         }
         out.println(message_formated);
         String response;
-        while(true){
+        do {
             response = in.readLine();
-            if(response != null)
-                break;
-        }
+        } while (response == null);
         System.out.println(response);
 
         out.println("ACK");
@@ -120,7 +118,6 @@ public class Client {
         in.close();
         out.close();
         socket.close();
-        return;
     }
 
 
@@ -132,8 +129,6 @@ public class Client {
      * @return le bon format en fonction de la requete
      *************************************************************************************************/
     public static String command_format(String request, String command) {
-        Scanner scanner = new Scanner(System.in);
-
 
         switch (command) {
             case "PUBLISH":
@@ -179,7 +174,7 @@ public class Client {
                 return command + " " + author + " " + msg_id + " \r\n";
 
 
-            case "SUBSCRIBE", "UNSUBSCRIBE":
+            case "SUBSCRIBE":
                 if (request.split(" ").length < 3 || !request.contains("author:@") && !request.contains("tag:")) {
                     System.out.println("Usage : (UN)SUBSCRIBE author:@author user:@user || tag:tag");
                     return null;
@@ -188,15 +183,25 @@ public class Client {
                 String info = request.split(" ")[2];
                 return command + " " + author + " " + info + " \r\n";
 
+            case "UNSUBSCRIBE":
+                if (request.split(" ").length < 3 || !request.contains("author:@") && !request.contains("tag:")) {
+                    System.out.println("Usage : (UN)SUBSCRIBE author:@author user:@user || tag:tag");
+                    return null;
+                }
+                author = request.split(" ")[1];
+                info = request.split(" ")[2];
+                return command + " " + author + " " + info + " \r\n";
+
 
             default:
-                System.out.println("Commande inconnu, \r\n" +
-                        "   Usage : PUBLISH author:@user Message:message \r\n" +
-                        "   Usage : RCV_IDS [author:@user] [tag:#tag] [since_id:id] [limit:n] \r\n" +
-                        "   Usage : RCV_MSG msg_id:id \r\n" +
-                        "   Usage : REPLY author:@user reply_to_id:id Message:message \r\n" +
-                        "   Usage : REPUBLISH author:@user msg_id:id \r\n" +
-                        "   Usage : (UN)SUBSCRIBE author:@author user:@user || tag:tag");
+                System.out.println("""
+                        Commande inconnu, \r
+                           Usage : PUBLISH author:@user Message:message \r
+                           Usage : RCV_IDS [author:@user] [tag:#tag] [since_id:id] [limit:n] \r
+                           Usage : RCV_MSG msg_id:id \r
+                           Usage : REPLY author:@user reply_to_id:id Message:message \r
+                           Usage : REPUBLISH author:@user msg_id:id \r
+                           Usage : (UN)SUBSCRIBE author:@author user:@user || tag:tag""");
                 return null;
         }
 

@@ -7,10 +7,12 @@ import java.util.ArrayList;
 public class Command {
 
 
-    MessagesData data = new MessagesData();
-    UsersData usersData = new UsersData();
+    MessagesData data;
+    UsersData usersData;
 
     public Command() {
+        this.data = new MessagesData();
+        this.usersData = new UsersData();
     }
 
     /**************************************************************************************************
