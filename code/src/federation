@@ -1,0 +1,13 @@
+fichier txt cfg
+
+construction serveur:
+    lecture du fichier
+        si vide = master et port 12345
+        sinon recup le dernier port +1
+
+serveur peer :
+    on utilise le meme serveur que pour le maitre
+
+modification du serveur :
+    faire un if qui passe le serveur en mode relai
+

@@ -173,7 +173,6 @@ public class Client {
                 String msg_id = request.split(" ")[2];
                 return command + " " + author + " " + msg_id + " \r\n";
 
-
             case "SUBSCRIBE":
                 if (request.split(" ").length < 3 || !request.contains("author:@") && !request.contains("tag:")) {
                     System.out.println("Usage : (UN)SUBSCRIBE author:@author user:@user || tag:tag");
@@ -192,7 +191,6 @@ public class Client {
                 info = request.split(" ")[2];
                 return command + " " + author + " " + info + " \r\n";
 
-
             default:
                 System.out.println("""
                         Commande inconnu, \r
@@ -204,7 +202,6 @@ public class Client {
                            Usage : (UN)SUBSCRIBE author:@author user:@user || tag:tag""");
                 return null;
         }
-
     }
 
     public static class MyFlux implements Runnable{
