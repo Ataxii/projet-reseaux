@@ -53,7 +53,7 @@ public class NonBlockingSelectorServer {
 
                             //verification de la fermeture du serveur
                             //requete envoyé depuis le client
-                            if(msg.equals("ACK")){
+                            if(msg.replace("\n", "").equals("ACK")){
                                 System.out.println("Client deconected");
                                 client.write(ByteBuffer.wrap("close".getBytes(StandardCharsets.UTF_8)));
                                 client.close();

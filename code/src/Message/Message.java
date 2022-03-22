@@ -34,8 +34,8 @@ public class Message {
 
         /** TODO à tester mais ça devrait marcher **/
         connexion.insertMessage(author,message,republish,reply);
-        String id_m = connexion.selectAllMessage("WHERE author = " + author + "AND message = " + message + ";").split(" ")[0];
-        connexion.insertMessageResponse(Integer.parseInt(id_m),-1);
+        //String id_m = connexion.selectAllMessage("WHERE author = " + author + "AND message = " + message + ";").split(" ")[0];
+        //connexion.insertMessageResponse(Integer.parseInt(id_m),-1);
     }
 
 
@@ -97,7 +97,6 @@ public class Message {
         if( request.contains("#")){
             String[] split = request.split("#");
             for (String word : split) {
-                System.out.println("Word = " + word);
                 if(!Objects.equals(word.split(" ")[0], "PUBLISH"))
                     hashtag.add(word.split(" ")[0]);
             }

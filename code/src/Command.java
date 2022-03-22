@@ -60,20 +60,22 @@ public class Command {
      *************************************************************************************************/
     private boolean subscribe(String request) {
         String author = request.split("author:@")[1].split(" ")[0].replace(" ", "").replace("\n", "");
-        if(!usersData.userList.containsKey(author)){
-            return false;
-        }
+
         if(request.contains("user:@")){
             String user = request.split("user:@")[1].split(" ")[0].replace(" ", "").replace("\n", "");
 
             usersData.addSubscribe(author, usersData.getUser(user));
 
-        }else {
+            return true;
+        }
+        if (request.contains("tag:")){
             String tag = request.split("tag:")[1].split(" ")[0].replace(" ", "").replace("\n", "");
 
             usersData.addSubscribe(author, tag);
+
+            return true;
         }
-        return true;
+        return false;
     }
 
 
@@ -121,6 +123,7 @@ public class Command {
         Message originalMessage = data.responseId(id);
         Message newMessage = new Message(initial, author, originalMessage.getHashtag(), originalMessage.getMessage(), true, -1);
         data.add(newMessage);
+        usersData.addMessage(newMessage);
         System.out.println(newMessage);
         server.id++;
         return true;
@@ -144,6 +147,7 @@ public class Command {
         if (data.containsID(id)){
             Message newMessage = new Message(request, initId, id);
             data.responseId(id).addResponse(newMessage);
+            usersData.addMessage(newMessage);
             data.add(newMessage);
             System.out.println(newMessage);
             server.id++;

@@ -1,12 +1,19 @@
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.net.Socket;
+import java.util.Objects;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class Client {
+public class Microblogamu {
+
+    //client final qui pourra juste : publish reply republish (un)subcribe
+
     public static void main(String[] args) throws IOException {
-        if(args.length != 2){
+        if (args.length != 2) {
             System.out.println("Usage : Java Client.java host port");
             return;
         }
@@ -18,29 +25,10 @@ public class Client {
 
         PrintStream out = new PrintStream(socket.getOutputStream());
 
-        //si jamais le client ecrit pas un chiffre je sais pas comment faire a part de faire un try catch
+        MyFlux flux = new MyFlux(in);
+        flux(out,flux);
 
-        System.out.println("Que veux tu faire ? /n connection au flux (1) : envoie de requete (2)");
-        Scanner scanner =  new Scanner(System.in);
-        System.out.print("-> ");
-
-        String input = scanner.nextLine();
-        try{
-            if(Integer.parseInt(input) == 1){
-
-                flux(out, in, socket);
-                scanner.close();
-            }
-            if(Integer.parseInt(input) == 2){
-
-                request(out, in, socket);
-                scanner.close();
-            }
-            else System.out.println("connection au flux (1) : envoie de requete (2)");
-        }catch (Exception e){
-            System.out.println("connection au flux (1) : envoie de requete (2)");
-        }
-
+        request(out, in, socket, flux);
 
     }
 
@@ -48,37 +36,21 @@ public class Client {
      * permet de faire le passage en mode flux et d'eviter de faire un nouveau client
      *
      *************************************************************************************************/
-    private static void flux(PrintStream out, BufferedReader in, Socket socket) throws IOException {
-        System.out.println("vous etes dans la section flux \n si vous voulez sortir faites [stop]");
+    private static void flux(PrintStream out, MyFlux flux) throws IOException {
+        System.out.println("Une session de flux a ete ouverte");
 
-        Scanner scanner =  new Scanner(System.in);
+        Scanner scanner = new Scanner(System.in);
         System.out.print("quel est votre pseudo ?\n -> ");
         String pseudo = scanner.nextLine();
         //demande au serveur de se connecter au flux
-        out.println("fluxconnect " + pseudo );
+        out.println("fluxconnect " + pseudo);
         //jsute pour qu'on puisse interompre propement le flux avec une entrée utlisateur
 
         //gestion de l'affichage appart
         ExecutorService executor;
         executor = Executors.newCachedThreadPool();
-        MyFlux flux = new MyFlux(in);
         executor.execute(flux);
 
-
-        String responseCLient;
-        System.out.println("passage du thread");
-        while(scanner.hasNextLine()){
-
-            System.out.println("entré dans le scanner");
-            responseCLient = scanner.nextLine();
-            if(responseCLient.equals("stop")){
-                out.println("ACK");
-                flux.stop();
-                out.close();
-                socket.close();
-                break;
-            }
-        }
     }
 
 
@@ -87,37 +59,50 @@ public class Client {
      * @param out envoie de messages
      * @param in recection de message
      * @param socket de connection au serveur
+     * @param flux
      * @throws IOException pour readLine
      *************************************************************************************************/
-    public static void request(PrintStream out, BufferedReader in, Socket socket) throws IOException {
+    public static void request(PrintStream out, BufferedReader in, Socket socket, MyFlux flux) throws IOException {
 
-        System.out.println("vous etes dans la section requete\n");
-        Scanner scanner =  new Scanner(System.in);
-        System.out.print("-> ");
+        Scanner scanner = new Scanner(System.in);
+
         //envoie du message
 
-        String data = scanner.nextLine();
+        String data = "";
 
-        String message_formated = command_format(data, data.split(" ")[0]);
+        String message_formated = null;
 
-        while (message_formated == null){
-            System.out.print("-> ");
-            data = scanner.nextLine();
 
-            message_formated = command_format(data, data.split(" ")[0]);
+        while (true){
+            while (message_formated == null) {
+                System.out.print("-> ");
+                data = scanner.nextLine();
+
+                message_formated = command_format(data, data.split(" ")[0]);
+            }
+            if (Objects.equals(message_formated, "close")){
+                flux.stop();
+                close(out, in, socket);
+                System.exit(1);
+            }
+
+            out.println(message_formated);
+            String response;
+            do {
+                response = in.readLine();
+            } while (response == null);
+            System.out.println(response);
+
         }
-        out.println(message_formated);
-        String response;
-        do {
-            response = in.readLine();
-        } while (response == null);
-        System.out.println(response);
+    }
 
+    public static void close(PrintStream out, BufferedReader in, Socket socket) throws IOException {
+        System.out.println("fermeture de la connexion...");
         out.println("ACK");
-
         in.close();
         out.close();
         socket.close();
+        System.out.println("connexion fermée");
     }
 
 
@@ -138,22 +123,6 @@ public class Client {
                 }
                 String pseudo = request.split(" ")[1];
                 return command + " " + pseudo + "\r\n" + request.split(pseudo)[1].split("\n")[0] + " ";
-
-            case "RCV_IDS":
-                if (request.split(" ").length < 1 || (request.contains("author:") && !request.contains("author:@"))) {
-
-                    System.out.println("Usage : RCV_IDS [author:@user] [tag:#tag] [since_id:id] [limit:n]");
-                    return null;
-
-                }
-                return request + " ";
-
-            case "RCV_MSG":
-                if (request.split(" ").length == 3 || !request.contains("msg_id:")) {
-                    System.out.println("Usage : RCV_MSG msg_id:id");
-                    return null;
-                }
-                return request + " ";
 
             case "REPLY":
                 if (request.split(" ").length < 4 || !request.contains("author:@") || !request.contains("reply_to_id:")) {
@@ -192,13 +161,14 @@ public class Client {
                 info = request.split(" ")[2];
                 return command + " " + author + " " + info + " \r\n";
 
+            case "close":
+                return "close";
+
 
             default:
                 System.out.println("""
                         Commande inconnu, \r
                            Usage : PUBLISH author:@user Message:message \r
-                           Usage : RCV_IDS [author:@user] [tag:#tag] [since_id:id] [limit:n] \r
-                           Usage : RCV_MSG msg_id:id \r
                            Usage : REPLY author:@user reply_to_id:id Message:message \r
                            Usage : REPUBLISH author:@user msg_id:id \r
                            Usage : (UN)SUBSCRIBE author:@author user:@user || tag:tag""");
@@ -207,17 +177,18 @@ public class Client {
 
     }
 
-    public static class MyFlux implements Runnable{
+    public static class MyFlux implements Runnable {
 
         boolean kill = false;
         BufferedReader in;
-        public MyFlux(BufferedReader in){
+
+        public MyFlux(BufferedReader in) {
             this.in = in;
         }
 
         @Override
         public void run() {
-            while(!kill){
+            while (!kill) {
                 try {
                     System.out.println(in.readLine());
                 } catch (IOException e) {
@@ -226,9 +197,10 @@ public class Client {
             }
         }
 
-        public void stop() throws IOException {
-            in.close();
+        public void stop(){
             kill = true;
+            System.out.println("flux fermé");
         }
     }
 }
+

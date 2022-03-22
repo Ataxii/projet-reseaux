@@ -6,3 +6,8 @@ RCV_MSG msg_id:7
 
 RCV_IDS
 SUBSCRIBE author:@sa user:@to
+
+PUBLISH author:@sa salut les amis #to
+PUBLISH author:@to salut mec #tard #paslu
+
+SUBSCRIBE author:@to tag:to

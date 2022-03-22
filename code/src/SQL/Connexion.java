@@ -47,7 +47,7 @@ public class Connexion {
 
 
     /*** SelectAll ***/
-    public String selectAllUser(){
+ /*   public String selectAllUser(){
         String sql = "SELECT * FROM User" ;
         StringBuilder response= new StringBuilder();
         try (Connection conn = DriverManager.getConnection(URL);
@@ -163,6 +163,7 @@ public class Connexion {
         }
         return String.valueOf(response);
     }
+    */
     /*** Insert dans les tables ***/
     public void insertUserList(String username, String username_subscriber){
         createNewRequest("INSERT INTO UserList (username,usernameSubscriber) VALUES ('"+username+"','"+username_subscriber+"');");

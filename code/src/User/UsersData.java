@@ -45,6 +45,26 @@ public class UsersData {
         for (User user: subscribesTo.get(message.getAuthor())){
             messagesToUpdate.get(user).add(message);
         }
+
+
+        for (String hashtag :
+                message.getHashtag()) {
+            if(!subscribesHashtagTo.containsKey(hashtag)){
+                subscribesHashtagTo.put(hashtag, new ArrayList<User>());
+            }
+        }
+
+        if (!message.getHashtag().isEmpty()){
+            for (String hashtag :message.getHashtag()) {
+                if(hashtag != null){
+                    for (User user: subscribesHashtagTo.get(hashtag)){
+                        if(!messagesToUpdate.get(user).contains(message)){
+                            messagesToUpdate.get(user).add(message);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /*************************************************************************************************
@@ -61,6 +81,13 @@ public class UsersData {
         if(!messagesToUpdate.containsKey(user)){
             messagesToUpdate.put(user, new ArrayBlockingQueue<Message>(300));
         }
+        for (String hashtag :
+                user.getHashtag()) {
+            if(!subscribesHashtagTo.containsKey(hashtag)){
+                subscribesHashtagTo.put(hashtag, new ArrayList<User>());
+            }
+        }
+
     }
 
     /*************************************************************************************************
