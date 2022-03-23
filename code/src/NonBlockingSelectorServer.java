@@ -7,8 +7,7 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -48,7 +47,7 @@ public class NonBlockingSelectorServer {
         server.register(selector, SelectionKey.OP_ACCEPT);
 
         ByteBuffer buffer = ByteBuffer.allocate(128);
-        //TODO ouverture d'un thread pour recevoir le fil d'actu revoyé du master ?
+
         //puis lancer les clients faire leur requete en dessous
         //il y aura donc qu'un seul Thread pour faire l'affichage des messages du master
         BufferedReader in = null;
@@ -65,8 +64,7 @@ public class NonBlockingSelectorServer {
                             socket.getInputStream()));
 
             out = new PrintStream(socket.getOutputStream());
-            ExecutorService poolForMaster;
-            poolForMaster = Executors.newCachedThreadPool();
+            ExecutorService poolForMaster= Executors.newCachedThreadPool();
             poolForMaster.execute(new MasterFlux(in));
         }
 
@@ -108,7 +106,7 @@ public class NonBlockingSelectorServer {
                                 executor = Executors.newCachedThreadPool();
                                 String pseudo = msg.split(" ")[1].replace("\n", "").replace(" ", "");
                                 executor.execute(new MyFlux(buffer, client, command, pseudo));
-
+                                //client.write(ByteBuffer.wrap("flux connected".getBytes(StandardCharsets.UTF_8)));
                             }
                             else {
                                 if (isMaster){
@@ -153,30 +151,42 @@ public class NonBlockingSelectorServer {
             e.printStackTrace();
         }
         BufferedReader reader = new BufferedReader(new FileReader(file));
+        Scanner obj = new Scanner(file);
+
         String line ="";
 
         String document = "";
-        //TODO : tester que readline soit pas null
-        while (!(line = reader.readLine()).isEmpty()){
-            document += line;
+
+        if (reader.readLine() == null){
+            System.out.println("Ajout du Master");
+            serverPort = 12345;
+            PrintWriter writer = new PrintWriter(new FileWriter(file));
+            writer.print("0=12345;");
+            writer.close();
+
+            return;
         }
 
+       /* while ((line = reader.readLine()) != null){
+            System.out.println(line);
+            document += line;
+        }*/
+
+        while(obj.hasNextLine()){
+            document+= obj.nextLine();
+        }
+        System.out.println(document);
         //structure du fichier :
         // master=12345;1=12346;2=12347
 
-        if(document.isEmpty()){
-            serverPort = 12345;
-            FileWriter fileWriter = new FileWriter(file);
-            fileWriter.write("master=12345");
-        }
-        else {
-            String last = document.split(";")[document.split(";").length];
-            int lastNb =Integer.parseInt(last.split("=")[0]);
-            int lastPort =Integer.parseInt(last.split("=")[1]);
-            serverPort = lastPort + 1;
-            FileWriter fileWriter = new FileWriter(file);
-            fileWriter.write(document + (lastNb+1) + "=" + serverPort);
-        }
+        String last = document.split(";")[document.split(";").length-1];
+        int lastNb = Integer.parseInt(last.split("=")[0]);
+        int lastPort = Integer.parseInt(last.split("=")[1]);
+        serverPort = lastPort + 1;
+        System.out.println("ajout du serveur " + (lastNb+1) + " : " + lastPort);
+        PrintWriter writer = new PrintWriter(new FileWriter(file));
+        writer.append(document).append(String.valueOf(lastNb + 1)).append("=").append(String.valueOf(serverPort)).append(";");
+        writer.close();
     }
 
 }

@@ -12,7 +12,7 @@ public class Microblogamu {
 
     //client final qui pourra juste : publish reply republish (un)subcribe
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         if (args.length != 2) {
             System.out.println("Usage : Java Client.java host port");
             return;
@@ -26,7 +26,9 @@ public class Microblogamu {
         PrintStream out = new PrintStream(socket.getOutputStream());
 
         MyFlux flux = new MyFlux(in);
-        flux(out,flux);
+
+
+        flux(in, out,flux);
 
         request(out, in, socket, flux);
 
@@ -36,7 +38,7 @@ public class Microblogamu {
      * permet de faire le passage en mode flux et d'eviter de faire un nouveau client
      *
      *************************************************************************************************/
-    private static void flux(PrintStream out, MyFlux flux) throws IOException {
+    private static void flux(BufferedReader in, PrintStream out, MyFlux flux) throws IOException {
         System.out.println("Une session de flux a ete ouverte");
 
         Scanner scanner = new Scanner(System.in);
@@ -62,7 +64,7 @@ public class Microblogamu {
      * @param flux
      * @throws IOException pour readLine
      *************************************************************************************************/
-    public static void request(PrintStream out, BufferedReader in, Socket socket, MyFlux flux) throws IOException {
+    public static void request(PrintStream out, BufferedReader in, Socket socket, MyFlux flux) throws IOException, InterruptedException {
 
         Scanner scanner = new Scanner(System.in);
 
@@ -70,11 +72,11 @@ public class Microblogamu {
 
         String data = "";
 
-        String message_formated = null;
-
 
         while (true){
+            String message_formated = null;
             while (message_formated == null) {
+                Thread.sleep(20);
                 System.out.print("-> ");
                 data = scanner.nextLine();
 
@@ -87,12 +89,6 @@ public class Microblogamu {
             }
 
             out.println(message_formated);
-            String response;
-            do {
-                response = in.readLine();
-            } while (response == null);
-            System.out.println(response);
-
         }
     }
 
@@ -190,7 +186,7 @@ public class Microblogamu {
         public void run() {
             while (!kill) {
                 try {
-                    System.out.println(in.readLine());
+                    System.out.println( in.readLine());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
