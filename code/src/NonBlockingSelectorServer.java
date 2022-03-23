@@ -1,7 +1,4 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
+import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
@@ -14,18 +11,28 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.ToDoubleBiFunction;
+
 
 public class NonBlockingSelectorServer {
     public int id = 0;
     boolean isMaster = false;
+    public int serverPort;
 
     public void execute() throws IOException {
+
+        //principe :
+        //  client envoie a un serveur lambda, le serveur redirige vers master,
+        //  le master renvoie la commnade traité pour que le serveur lambda puisse lafficher
+        //  le serveur lambda va recevoir aussi les messages des autres serveurs
 
         Command command = new Command();
 
         ServerSocketChannel server = ServerSocketChannel.open();
-        InetSocketAddress inetSocketAddress = new InetSocketAddress(12345);
+
+        //distribution des ports
+        portAttribution();
+
+        InetSocketAddress inetSocketAddress = new InetSocketAddress(serverPort);
 
 
         server.socket().bind(inetSocketAddress);
@@ -43,7 +50,25 @@ public class NonBlockingSelectorServer {
         ByteBuffer buffer = ByteBuffer.allocate(128);
         //TODO ouverture d'un thread pour recevoir le fil d'actu revoyé du master ?
         //puis lancer les clients faire leur requete en dessous
-        //il y aura donc qu'un seul Thread pour ca
+        //il y aura donc qu'un seul Thread pour faire l'affichage des messages du master
+        BufferedReader in = null;
+        PrintStream out = null;
+
+        if (!isMaster){
+            //creation du Thread qui va gerer l'affichage des messages envoyé par le master
+
+            //connection au master
+            Socket socket = new Socket("localhost", 12345);
+
+            in = new BufferedReader(
+                    new InputStreamReader(
+                            socket.getInputStream()));
+
+            out = new PrintStream(socket.getOutputStream());
+            ExecutorService poolForMaster;
+            poolForMaster = Executors.newCachedThreadPool();
+            poolForMaster.execute(new MasterFlux(in));
+        }
 
         while (true) {
             int channelCount = selector.select();
@@ -96,17 +121,10 @@ public class NonBlockingSelectorServer {
                                 else {
                                     //envoie de la requete sur le serveur maitre
                                     //TODO faire une focntion qui traitre avant le message
-                                    Socket socket = new Socket("localhost", 12345);
 
-                                    BufferedReader in = new BufferedReader(
-                                            new InputStreamReader(
-                                                    socket.getInputStream()));
-
-                                    PrintStream out = new PrintStream(socket.getOutputStream());
+                                    assert out != null;
                                     out.println(msg);
                                 }
-
-
                             }
                             buffer.clear();
                         }
@@ -116,4 +134,49 @@ public class NonBlockingSelectorServer {
             }
         }
     }
+
+
+
+    public void portAttribution() throws IOException {
+        File file = null;
+        try {
+
+            file = new File("attributionPort.txt");
+
+            if (file.createNewFile()){
+                System.out.println("Fichier créé!");
+            }else{
+                System.out.println("Fichier existe déjà.");
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        BufferedReader reader = new BufferedReader(new FileReader(file));
+        String line ="";
+
+        String document = "";
+        //TODO : tester que readline soit pas null
+        while (!(line = reader.readLine()).isEmpty()){
+            document += line;
+        }
+
+        //structure du fichier :
+        // master=12345;1=12346;2=12347
+
+        if(document.isEmpty()){
+            serverPort = 12345;
+            FileWriter fileWriter = new FileWriter(file);
+            fileWriter.write("master=12345");
+        }
+        else {
+            String last = document.split(";")[document.split(";").length];
+            int lastNb =Integer.parseInt(last.split("=")[0]);
+            int lastPort =Integer.parseInt(last.split("=")[1]);
+            serverPort = lastPort + 1;
+            FileWriter fileWriter = new FileWriter(file);
+            fileWriter.write(document + (lastNb+1) + "=" + serverPort);
+        }
+    }
+
 }
