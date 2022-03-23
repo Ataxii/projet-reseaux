@@ -1,10 +1,14 @@
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.Socket;
+
 import java.util.Objects;
 import java.util.Scanner;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -89,6 +93,7 @@ public class Microblogamu {
             }
 
             out.println(message_formated);
+            flux.print();
         }
     }
 
@@ -177,6 +182,7 @@ public class Microblogamu {
 
         boolean kill = false;
         BufferedReader in;
+        ConcurrentLinkedQueue<String> actu = new ConcurrentLinkedQueue<String>();
 
         public MyFlux(BufferedReader in) {
             this.in = in;
@@ -186,7 +192,12 @@ public class Microblogamu {
         public void run() {
             while (!kill) {
                 try {
-                    System.out.println( in.readLine());
+                    String read = in.readLine();
+                    if (!read.contains("author:")){
+                        System.out.println(read);
+                    }else {
+                        actu.add(in.readLine());
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -196,6 +207,20 @@ public class Microblogamu {
         public void stop(){
             kill = true;
             System.out.println("flux fermé");
+        }
+
+        public void print() throws InterruptedException {
+            if (!actu.isEmpty()){
+                Thread.sleep(40);
+                System.out.println("Messages de votre flux : \n");
+                for (String message : actu) {
+                    System.out.println(message);
+                }
+                actu.removeAll(actu);
+
+                System.out.println("fin des messages de votre flux");
+            }
+
         }
     }
 }

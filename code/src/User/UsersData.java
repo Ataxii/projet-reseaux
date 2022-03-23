@@ -137,6 +137,7 @@ public class UsersData {
     }
 
     public User getUser(String nameUser){
+        newUser(new User(nameUser));
         return userList.get(nameUser);
     }
 }

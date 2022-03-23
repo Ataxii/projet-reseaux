@@ -7,12 +7,14 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Iterator;
+import java.util.Scanner;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 
-public class NonBlockingSelectorServer {
+public class ServerBase {
     public int id = 0;
     boolean isMaster = false;
     public int serverPort;
@@ -24,7 +26,7 @@ public class NonBlockingSelectorServer {
         //  le master renvoie la commnade traité pour que le serveur lambda puisse lafficher
         //  le serveur lambda va recevoir aussi les messages des autres serveurs
 
-        Command command = new Command(this);
+        Command command = null;//new Command();
 
         ServerSocketChannel server = ServerSocketChannel.open();
 
@@ -111,19 +113,10 @@ public class NonBlockingSelectorServer {
                             else {
                                 if (isMaster){
                                     ///////choix du client///////
-                                    String responseServ = command.getChoice(msg, id);
-                                    //ajout de l'id pour que tout les autres serveur est le meme
-                                    msg = msg + (id-1);
+                                    //String responseServ = command.getChoice(msg, id, this);
                                     buffer.flip();
                                     //byte[] response = (responseServ + "\n").getBytes(StandardCharsets.UTF_8);
-                                    //renvoie a tout les autres serveurs le message en brut pour qu'ils le gerent eux meme
-                                    for (SelectionKey keyResponse : keys) {
-                                        SocketChannel clientResponse = (SocketChannel) keyResponse.channel();
-                                        clientResponse.write(ByteBuffer.wrap(msg.getBytes(StandardCharsets.UTF_8)));
-
-                                    }
                                     //client.write(ByteBuffer.wrap(response));
-
                                 }
                                 else {
                                     //envoie de la requete sur le serveur maitre
@@ -164,35 +157,37 @@ public class NonBlockingSelectorServer {
 
         String line ="";
 
-        StringBuilder document = new StringBuilder();
+        String document = "";
 
         if (reader.readLine() == null){
             System.out.println("Création du serveur Master");
             serverPort = 12345;
             PrintWriter writer = new PrintWriter(new FileWriter(file));
-            writer.print(0 + "=" + serverPort+ ";");
             writer.close();
 
             return;
         }
 
+       /* while ((line = reader.readLine()) != null){
+            System.out.println(line);
+            document += line;
+        }*/
+
         while(obj.hasNextLine()){
-            document.append(obj.nextLine());
+            document+= obj.nextLine();
         }
         System.out.println(document);
         //structure du fichier :
         // master=12345;1=12346;2=12347
 
-        String last = document.toString().split(";")[document.toString().split(";").length-1];
+        String last = document.split(";")[document.split(";").length-1];
         int lastNb = Integer.parseInt(last.split("=")[0]);
         int lastPort = Integer.parseInt(last.split("=")[1]);
         serverPort = lastPort + 1;
         System.out.println("Création d'un serveur peer n° " + (lastNb+1) + ", port : " + serverPort);
         PrintWriter writer = new PrintWriter(new FileWriter(file));
-        writer.append(document.toString()).append(String.valueOf(lastNb + 1)).append("=").append(String.valueOf(serverPort)).append(";");
+        writer.append(document).append(String.valueOf(lastNb + 1)).append("=").append(String.valueOf(serverPort)).append(";");
         writer.close();
     }
-
-
 
 }

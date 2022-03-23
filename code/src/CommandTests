@@ -1,3 +1,5 @@
+javac Main.java NonBlockingSelectorServer.java Command.java
+
 PUBLISH author:@sa salut
 PUBLISH author:@to salut
 

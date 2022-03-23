@@ -9,10 +9,11 @@ public class Command {
 
     MessagesData data;
     UsersData usersData;
-
-    public Command() {
+    NonBlockingSelectorServer server;
+    public Command(NonBlockingSelectorServer server) {
         this.data = new MessagesData();
         this.usersData = new UsersData();
+        this.server = server;
     }
 
     /**************************************************************************************************
@@ -21,7 +22,7 @@ public class Command {
      * @param id du message
      * @return message d'erreur ou de validation
      *************************************************************************************************/
-    public String getChoice(String request, int id, NonBlockingSelectorServer server){
+    public String getChoice(String request, int id){
         String[] data = request.split(" ");
         String command = data[0];
 

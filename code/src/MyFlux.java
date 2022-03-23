@@ -28,6 +28,7 @@ public class MyFlux extends Thread {
                 //si non il bloque
 
                 User user = command.usersData.getUser(pseudo);
+
                 Message message = command.usersData.messagesToUpdate.get(user).take();
 
                 byte[] response = (message + "\n").getBytes(StandardCharsets.UTF_8);
