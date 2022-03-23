@@ -113,7 +113,7 @@ public class NonBlockingSelectorServer {
                                     ///////choix du client///////
                                     String responseServ = command.getChoice(msg, id);
                                     //ajout de l'id pour que tout les autres serveur est le meme
-                                    msg = msg + (id-1);
+                                    msg = msg + (id-1)+ "\r\n";
                                     buffer.flip();
                                     //byte[] response = (responseServ + "\n").getBytes(StandardCharsets.UTF_8);
                                     //renvoie a tout les autres serveurs le message en brut pour qu'ils le gerent eux meme

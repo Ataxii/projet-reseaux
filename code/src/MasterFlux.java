@@ -25,14 +25,21 @@ public class MasterFlux extends Thread {
                 //regarde tout le temps si le serveur envoie quelque chose au quel cas on l'affiche
                 //System.out.println(in.readLine());
 
+                //TODO probleme : le message que l'on recoi contient \n\r et donc le readline l'interprete comme fin de ligne
+                System.out.println("coucou");
+                ArrayList<String> arrayList = new ArrayList<>();
+                String line;
+                while((line = in.readLine()) != "\n")
+                {
+                    System.out.println(line);
+                    arrayList.add(line);
+                }
 
-                System.out.println(in.lines().toArray());
-                List<String> arrayList = in.lines().collect(Collectors.toList());
 
-                System.out.println(arrayList);
+                System.out.println("données recu ->" + arrayList);
                 String message = arrayList.get(0) + arrayList.get(1);
                 System.out.println("message provenant du serveur maitre >" + message);
-                int id = Integer.parseInt(arrayList.get(3));
+                int id = Integer.parseInt(arrayList.get(3).replace("\r\n",""));
 
                 command.getChoice(message, id);
 
