@@ -1,3 +1,4 @@
+import java.awt.image.AreaAveragingScaleFilter;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -25,6 +26,9 @@ public class NonBlockingSelectorServer {
         //  le serveur lambda va recevoir aussi les messages des autres serveurs
 
         Command command = new Command(this);
+
+        //TODO : verif
+        ArrayList<SocketChannel> socketChannels = new ArrayList<>();
 
         ServerSocketChannel server = ServerSocketChannel.open();
 
@@ -69,6 +73,7 @@ public class NonBlockingSelectorServer {
         }
 
         while (true) {
+
             int channelCount = selector.select();
             if (channelCount > 0) {
                 Set<SelectionKey> keys = selector.selectedKeys();
@@ -84,7 +89,9 @@ public class NonBlockingSelectorServer {
                         SelectionKey newkey = client.register(selector, SelectionKey.OP_READ, client.socket().getPort());
                         newkey.attach(false);
                     } else if (key.isReadable()) {
+
                         SocketChannel client = (SocketChannel) key.channel();
+                        socketChannels.add(client);
                         if (client.read(buffer) < 0) {
                             key.cancel();
                         } else {
@@ -94,7 +101,7 @@ public class NonBlockingSelectorServer {
                             //verification de la fermeture du serveur
                             //requete envoyé depuis le client
                             if(msg.replace("\n", "").equals("ACK")){
-                                System.out.println("Client deconected");
+                                System.out.println("Client deconected ");
                                 client.write(ByteBuffer.wrap("close".getBytes(StandardCharsets.UTF_8)));
                                 client.close();
                                 buffer.clear();
@@ -112,14 +119,14 @@ public class NonBlockingSelectorServer {
                                 if (isMaster){
                                     ///////choix du client///////
                                     String responseServ = command.getChoice(msg, id);
-                                    //ajout de l'id pour que tout les autres serveur est le meme
-                                    msg = msg + (id-1)+ "\r\n";
+                                    //ajout de l'id pour que tous les autres serveurs aient le meme
+                                    msg = (id-1) + "\n" + msg;
                                     buffer.flip();
                                     //byte[] response = (responseServ + "\n").getBytes(StandardCharsets.UTF_8);
-                                    //renvoie a tout les autres serveurs le message en brut pour qu'ils le gerent eux meme
-                                    for (SelectionKey keyResponse : keys) {
-                                        SocketChannel clientResponse = (SocketChannel) keyResponse.channel();
-                                        clientResponse.write(ByteBuffer.wrap(msg.getBytes(StandardCharsets.UTF_8)));
+                                    //renvoie à tous les autres serveurs le message en brut pour qu'ils le gerent eux meme
+                                    for (SocketChannel chan : socketChannels) {
+
+                                        chan.write(ByteBuffer.wrap(msg.getBytes(StandardCharsets.UTF_8)));
 
                                     }
                                     //client.write(ByteBuffer.wrap(response));
@@ -127,8 +134,6 @@ public class NonBlockingSelectorServer {
                                 }
                                 else {
                                     //envoie de la requete sur le serveur maitre
-                                    //TODO faire une focntion qui traitre avant le message
-
                                     assert out != null;
                                     out.println(msg);
                                 }
@@ -167,19 +172,18 @@ public class NonBlockingSelectorServer {
         StringBuilder document = new StringBuilder();
 
         if (reader.readLine() == null){
-            System.out.println("Création du serveur Master");
+
             serverPort = 12345;
             PrintWriter writer = new PrintWriter(new FileWriter(file));
             writer.print(0 + "=" + serverPort+ ";");
             writer.close();
-
+            System.out.println("Création du serveur Master port : " + serverPort);
             return;
         }
 
         while(obj.hasNextLine()){
             document.append(obj.nextLine());
         }
-        System.out.println(document);
         //structure du fichier :
         // master=12345;1=12346;2=12347
 
