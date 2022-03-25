@@ -1,4 +1,3 @@
-import java.awt.image.AreaAveragingScaleFilter;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -27,19 +26,17 @@ public class NonBlockingSelectorServer {
 
         Command command = new Command(this);
 
-        //TODO : verif
-        ArrayList<SocketChannel> socketChannels = new ArrayList<>();
-
         ServerSocketChannel server = ServerSocketChannel.open();
 
         //distribution des ports
         portAttribution();
 
+
         InetSocketAddress inetSocketAddress = new InetSocketAddress(serverPort);
 
 
         server.socket().bind(inetSocketAddress);
-        if (inetSocketAddress.getPort()==12345){
+        if (inetSocketAddress.getPort() == 12345) {
             isMaster = true;
         }
 
@@ -57,7 +54,8 @@ public class NonBlockingSelectorServer {
         BufferedReader in = null;
         PrintStream out = null;
 
-        if (!isMaster){
+        HashSet<SocketChannel> listServer = new HashSet<>();
+        if (!isMaster) {
             //creation du Thread qui va gerer l'affichage des messages envoyé par le master
 
             //connection au master
@@ -68,8 +66,9 @@ public class NonBlockingSelectorServer {
                             socket.getInputStream()));
 
             out = new PrintStream(socket.getOutputStream());
-            ExecutorService poolForMaster= Executors.newCachedThreadPool();
+            ExecutorService poolForMaster = Executors.newCachedThreadPool();
             poolForMaster.execute(new MasterFlux(in, command));
+            out.print("SERVERCONNECT");
         }
 
         while (true) {
@@ -90,17 +89,24 @@ public class NonBlockingSelectorServer {
                         newkey.attach(false);
                     } else if (key.isReadable()) {
 
+
                         SocketChannel client = (SocketChannel) key.channel();
-                        socketChannels.add(client);
+
+
                         if (client.read(buffer) < 0) {
                             key.cancel();
                         } else {
 
-                            String msg = new String(buffer.array(), 0,  buffer.position());
+                            String msg = new String(buffer.array(), 0, buffer.position());
 
+                            //message envoyé d'un serveur au serveur master pour lui notifier que cest un serveur et non un client
+                            if (msg.replace("\n", "").equals("SERVERCONNECT")) {
+                                listServer.add(client);//TODO test
+                                continue;
+                            }
                             //verification de la fermeture du serveur
                             //requete envoyé depuis le client
-                            if(msg.replace("\n", "").equals("ACK")){
+                            if (msg.replace("\n", "").equals("ACK")) {
                                 System.out.println("Client deconected ");
                                 client.write(ByteBuffer.wrap("close".getBytes(StandardCharsets.UTF_8)));
                                 client.close();
@@ -108,31 +114,29 @@ public class NonBlockingSelectorServer {
                                 continue;
                             }
 
-                            if(msg.split(" ")[0].equals("fluxconnect")){
+                            if (msg.split(" ")[0].equals("fluxconnect")) {
                                 ExecutorService executor;
                                 executor = Executors.newCachedThreadPool();
                                 String pseudo = msg.split(" ")[1].replace("\n", "").replace(" ", "");
                                 executor.execute(new MyFlux(buffer, client, command, pseudo));
                                 //client.write(ByteBuffer.wrap("flux connected".getBytes(StandardCharsets.UTF_8)));
-                            }
-                            else {
-                                if (isMaster){
+                            } else {
+                                if (isMaster) {
                                     ///////choix du client///////
                                     String responseServ = command.getChoice(msg, id);
                                     //ajout de l'id pour que tous les autres serveurs aient le meme
-                                    msg = (id-1) + "\n" + msg;
+                                    msg = (id - 1) + "\n" + msg;
                                     buffer.flip();
                                     //byte[] response = (responseServ + "\n").getBytes(StandardCharsets.UTF_8);
                                     //renvoie à tous les autres serveurs le message en brut pour qu'ils le gerent eux meme
-                                    for (SocketChannel chan : socketChannels) {
 
-                                        chan.write(ByteBuffer.wrap(msg.getBytes(StandardCharsets.UTF_8)));
-
+                                    for (SocketChannel channel : listServer) {
+                                        channel.write(ByteBuffer.wrap(msg.getBytes(StandardCharsets.UTF_8)));
+                                        System.out.println("count");
                                     }
                                     //client.write(ByteBuffer.wrap(response));
 
-                                }
-                                else {
+                                } else {
                                     //envoie de la requete sur le serveur maitre
                                     assert out != null;
                                     out.println(msg);
@@ -148,16 +152,15 @@ public class NonBlockingSelectorServer {
     }
 
 
-
     public void portAttribution() throws IOException {
         File file = null;
         try {
 
             file = new File("/Users/ataxi/Library/Mobile Documents/com~apple~CloudDocs/Fac/L3/semestre 2/application reseaux/TP/projet-reseaux/pairs.cfg");
 
-            if (file.createNewFile()){
+            if (file.createNewFile()) {
                 System.out.println("Fichier créé!");
-            }else{
+            } else {
                 System.out.println("Fichier existe déjà.");
             }
 
@@ -167,36 +170,35 @@ public class NonBlockingSelectorServer {
         BufferedReader reader = new BufferedReader(new FileReader(file));
         Scanner obj = new Scanner(file);
 
-        String line ="";
+        String line = "";
 
         StringBuilder document = new StringBuilder();
 
-        if (reader.readLine() == null){
+        if (reader.readLine() == null) {
 
             serverPort = 12345;
             PrintWriter writer = new PrintWriter(new FileWriter(file));
-            writer.print(0 + "=" + serverPort+ ";");
+            writer.print(0 + "=" + serverPort + ";");
             writer.close();
             System.out.println("Création du serveur Master port : " + serverPort);
             return;
         }
 
-        while(obj.hasNextLine()){
+        while (obj.hasNextLine()) {
             document.append(obj.nextLine());
         }
         //structure du fichier :
         // master=12345;1=12346;2=12347
 
-        String last = document.toString().split(";")[document.toString().split(";").length-1];
+        String last = document.toString().split(";")[document.toString().split(";").length - 1];
         int lastNb = Integer.parseInt(last.split("=")[0]);
         int lastPort = Integer.parseInt(last.split("=")[1]);
         serverPort = lastPort + 1;
-        System.out.println("Création d'un serveur peer n° " + (lastNb+1) + ", port : " + serverPort);
+        System.out.println("Création d'un serveur peer n° " + (lastNb + 1) + ", port : " + serverPort);
         PrintWriter writer = new PrintWriter(new FileWriter(file));
         writer.append(document.toString()).append(String.valueOf(lastNb + 1)).append("=").append(String.valueOf(serverPort)).append(";");
         writer.close();
     }
-
 
 
 }
