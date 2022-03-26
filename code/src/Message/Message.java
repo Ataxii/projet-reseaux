@@ -80,6 +80,21 @@ public class Message {
         return result;
     }
 
+    public String inform(){
+        String result = "";
+        result += "author:@" +  author + " msg_id:" + id ;
+        if(reply != -1){
+            result += " reply_to_id:" + reply;
+        }
+
+        if(republish){
+            result += " republished:" + republish;
+        }
+
+        result += message + "\r";
+        return result;
+    }
+
     /**************************************************************************************************
      * donnez la requete en brut et la fonction le transforme en message
      * @param request la requete avec toutes les informations dedans

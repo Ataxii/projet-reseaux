@@ -30,17 +30,17 @@ public class MasterFlux extends Thread {
                     arrayList.add(line);
                 }
 
-                if (arrayList.get(1).contains("PUBLISH")){
-                    arrayList.add(2, "\r\n" );
+                if(arrayList.size()>1){
+                    if (arrayList.get(1).contains("PUBLISH")){
+                        arrayList.add(2, "\r\n" );
+                    }
+                    if (arrayList.get(1).contains("REPLY")){
+                        arrayList.add(3, "\r\n" );
+                    }
+                    else arrayList.add("\r\n");
                 }
-                if (arrayList.get(1).contains("REPLY")){
-                    arrayList.add(3, "\r\n" );
-                }
-                else arrayList.add("\r\n");
-
+                else continue;
                 String message = "";
-
-
 
                 for (int i = 1 ; i < arrayList.size()-1; i++) {
                     message += arrayList.get(i);
@@ -48,8 +48,6 @@ public class MasterFlux extends Thread {
 
                 int id = Integer.parseInt(arrayList.get(0));
                 command.getChoice(message, id);
-
-
             }
         }catch (Exception e){
             System.out.println("problème de reception du message venant du serveur master [" + Arrays.toString(e.getStackTrace()) + "]");

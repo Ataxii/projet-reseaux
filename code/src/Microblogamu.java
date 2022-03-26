@@ -42,7 +42,7 @@ public class Microblogamu {
      * permet de faire le passage en mode flux et d'eviter de faire un nouveau client
      *
      *************************************************************************************************/
-    private static void flux(BufferedReader in, PrintStream out, MyFlux flux) throws IOException {
+    private static void flux(BufferedReader in, PrintStream out, MyFlux flux) {
         System.out.println("Une session de flux a ete ouverte");
 
         Scanner scanner = new Scanner(System.in);
@@ -65,7 +65,7 @@ public class Microblogamu {
      * @param out envoie de messages
      * @param in recection de message
      * @param socket de connection au serveur
-     * @param flux
+     * @param flux permet de pouvoir fermer le flux en cas de fermeture du client
      * @throws IOException pour readLine
      *************************************************************************************************/
     public static void request(PrintStream out, BufferedReader in, Socket socket, MyFlux flux) throws IOException, InterruptedException {
@@ -74,7 +74,7 @@ public class Microblogamu {
 
         //envoie du message
 
-        String data = "";
+        String data;
 
 
         while (true){
@@ -92,8 +92,11 @@ public class Microblogamu {
                 System.exit(1);
             }
 
+            if(Objects.equals(message_formated, "refresh")){
+                flux.print();
+            }
+
             out.println(message_formated);
-            flux.print();
         }
     }
 
@@ -162,9 +165,11 @@ public class Microblogamu {
                 info = request.split(" ")[2];
                 return command + " " + author + " " + info + " \r\n";
 
-            case "close":
+            case "CLOSE":
                 return "close";
 
+            case "REFRESH":
+                return "refresh";
 
             default:
                 System.out.println("""
@@ -172,7 +177,10 @@ public class Microblogamu {
                            Usage : PUBLISH author:@user Message:message \r
                            Usage : REPLY author:@user reply_to_id:id Message:message \r
                            Usage : REPUBLISH author:@user msg_id:id \r
-                           Usage : (UN)SUBSCRIBE author:@author user:@user || tag:tag""");
+                           Usage : (UN)SUBSCRIBE author:@author user:@user || tag:tag\r
+                           Usage : REFRESH\r
+                           Usage : CLOSE""");
+
                 return null;
         }
 
@@ -182,7 +190,7 @@ public class Microblogamu {
 
         boolean kill = false;
         BufferedReader in;
-        ConcurrentLinkedQueue<String> actu = new ConcurrentLinkedQueue<String>();
+        ConcurrentLinkedQueue<String> actu = new ConcurrentLinkedQueue<>();
 
         public MyFlux(BufferedReader in) {
             this.in = in;
@@ -193,10 +201,10 @@ public class Microblogamu {
             while (!kill) {
                 try {
                     String read = in.readLine();
-                    if (!read.contains("author:")){
+                    if (read.contains("OK")|| read.contains("ERROR")){
                         System.out.println(read);
                     }else {
-                        actu.add(in.readLine());
+                        actu.add(read);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();

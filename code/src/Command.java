@@ -62,8 +62,10 @@ public class Command {
     private boolean subscribe(String request) {
         String author = request.split("author:@")[1].split(" ")[0].replace(" ", "").replace("\n", "");
 
+
         if(request.contains("user:@")){
             String user = request.split("user:@")[1].split(" ")[0].replace(" ", "").replace("\n", "");
+
 
             usersData.addSubscribe(author, usersData.getUser(user));
 

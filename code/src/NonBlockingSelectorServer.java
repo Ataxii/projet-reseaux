@@ -51,10 +51,13 @@ public class NonBlockingSelectorServer {
 
         //puis lancer les clients faire leur requete en dessous
         //il y aura donc qu'un seul Thread pour faire l'affichage des messages du master
-        BufferedReader in = null;
+        BufferedReader in;
         PrintStream out = null;
 
-        HashSet<SocketChannel> listServer = new HashSet<>();
+
+        ArrayList<SocketChannel> listServer = new ArrayList<>();
+
+
         if (!isMaster) {
             //creation du Thread qui va gerer l'affichage des messages envoyé par le master
 
@@ -80,6 +83,7 @@ public class NonBlockingSelectorServer {
 
                 while (iterator.hasNext()) {
                     SelectionKey key = iterator.next();
+                    iterator.remove();
 
                     if (key.isAcceptable()) {
                         System.out.println("client connected");
@@ -102,6 +106,7 @@ public class NonBlockingSelectorServer {
                             //message envoyé d'un serveur au serveur master pour lui notifier que cest un serveur et non un client
                             if (msg.replace("\n", "").equals("SERVERCONNECT")) {
                                 listServer.add(client);//TODO test
+                                buffer.clear();
                                 continue;
                             }
                             //verification de la fermeture du serveur
@@ -115,6 +120,7 @@ public class NonBlockingSelectorServer {
                             }
 
                             if (msg.split(" ")[0].equals("fluxconnect")) {
+
                                 ExecutorService executor;
                                 executor = Executors.newCachedThreadPool();
                                 String pseudo = msg.split(" ")[1].replace("\n", "").replace(" ", "");
@@ -125,14 +131,12 @@ public class NonBlockingSelectorServer {
                                     ///////choix du client///////
                                     String responseServ = command.getChoice(msg, id);
                                     //ajout de l'id pour que tous les autres serveurs aient le meme
-                                    msg = (id - 1) + "\n" + msg;
+                                    msg = (id - 1) + "\n" + msg + "\n";
                                     buffer.flip();
                                     //byte[] response = (responseServ + "\n").getBytes(StandardCharsets.UTF_8);
                                     //renvoie à tous les autres serveurs le message en brut pour qu'ils le gerent eux meme
-
                                     for (SocketChannel channel : listServer) {
                                         channel.write(ByteBuffer.wrap(msg.getBytes(StandardCharsets.UTF_8)));
-                                        System.out.println("count");
                                     }
                                     //client.write(ByteBuffer.wrap(response));
 
@@ -145,7 +149,6 @@ public class NonBlockingSelectorServer {
                             buffer.clear();
                         }
                     }
-                    iterator.remove();
                 }
             }
         }
@@ -169,8 +172,6 @@ public class NonBlockingSelectorServer {
         }
         BufferedReader reader = new BufferedReader(new FileReader(file));
         Scanner obj = new Scanner(file);
-
-        String line = "";
 
         StringBuilder document = new StringBuilder();
 
