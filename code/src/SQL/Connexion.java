@@ -3,7 +3,7 @@ package SQL;
 import java.sql.*;
 
 public class Connexion {
-    private final String URL = "jdbc:sqlite:bdd.sqlite";
+    private final String URL = "jdbc:sqlite:bdd2.sqlite";
     private Connection connection = null;
     private Statement statement = null;
 
@@ -47,7 +47,7 @@ public class Connexion {
 
 
     /*** SelectAll ***/
- /*   public String selectAllUser(){
+    public String selectAllUser(){
         String sql = "SELECT * FROM User" ;
         StringBuilder response= new StringBuilder();
         try (Connection conn = DriverManager.getConnection(URL);
@@ -63,6 +63,7 @@ public class Connexion {
     }
     public String selectAllMessage(String where){
         String sql = "SELECT * FROM Message " + where;
+        System.out.println("sql = " + sql);
         StringBuilder response= new StringBuilder();
         try (Connection conn = DriverManager.getConnection(URL);
              Statement stmt  = conn.createStatement();
@@ -80,8 +81,8 @@ public class Connexion {
         return String.valueOf(response);
     }
 
-    public String selectAllHashtagMessage(){
-        String sql = "SELECT * FROM HashtagMessage" ;
+    public String selectAllHashtagMessage(String where){
+        String sql = "SELECT * FROM HashtagMessage " + where ;
         StringBuilder response= new StringBuilder();
         try (Connection conn = DriverManager.getConnection(URL);
              Statement stmt  = conn.createStatement();
@@ -97,8 +98,8 @@ public class Connexion {
         return String.valueOf(response);
     }
 
-    public String selectAllHashtagUser(){
-        String sql = "SELECT * FROM HashtagUser" ;
+    public String selectAllHashtagUser(String where){
+        String sql = "SELECT * FROM HashtagUser " + where ;
         StringBuilder response= new StringBuilder();
         try (Connection conn = DriverManager.getConnection(URL);
              Statement stmt  = conn.createStatement();
@@ -130,8 +131,8 @@ public class Connexion {
         return String.valueOf(response);
     }
 
-    public String selectAllMessageResponses(){
-        String sql = "SELECT * FROM MessageData" ;
+    public String selectAllMessageResponses(String where){
+        String sql = "SELECT * FROM MessageResponses " + where ;
         StringBuilder response= new StringBuilder();
         try (Connection conn = DriverManager.getConnection(URL);
              Statement stmt  = conn.createStatement();
@@ -147,8 +148,8 @@ public class Connexion {
         return String.valueOf(response);
     }
 
-    public String selectAllUserList(){
-        String sql = "SELECT * FROM UserList" ;
+    public String selectAllUserList(String where){
+        String sql = "SELECT * FROM UserList " + where;
         StringBuilder response= new StringBuilder();
         try (Connection conn = DriverManager.getConnection(URL);
              Statement stmt  = conn.createStatement();
@@ -163,7 +164,7 @@ public class Connexion {
         }
         return String.valueOf(response);
     }
-    */
+
     /*** Insert dans les tables ***/
     public void insertUserList(String username, String username_subscriber){
         createNewRequest("INSERT INTO UserList (username,usernameSubscriber) VALUES ('"+username+"','"+username_subscriber+"');");
@@ -190,6 +191,12 @@ public class Connexion {
     }
     public void insertMessageResponse(int id_m, int id_r){
         createNewRequest("INSERT INTO MessageResponses (id_message,id_response) VALUES ("+id_m+","+id_r+");");
+    }
+
+    /** UPDATES **/
+    public void updateRepublish(Boolean republish, int id){
+        int v = republish ? 0:1;
+        createNewRequest("UPDATE Message set Republish = " + v +" where id = " + id);
     }
 
 

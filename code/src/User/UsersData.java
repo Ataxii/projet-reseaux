@@ -1,6 +1,7 @@
 package User;
 
 import Message.Message;
+import SQL.Connexion;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,11 +27,70 @@ public class UsersData {
     //un hashtag et les user qui y sont abonnés
     public HashMap<String, ArrayList<User>>subscribesHashtagTo;
 
+    private final Connexion connexion = new Connexion();
     public UsersData() {
-        this.userList = new HashMap<String, User>(); // Table
+        this.userList = recoverUser(); // Table
         this.messagesToUpdate = new ConcurrentHashMap<User, ArrayBlockingQueue<Message>>();
-        this.subscribesTo = new HashMap<>();
-        this.subscribesHashtagTo = new HashMap<>();
+        this.subscribesTo = recoverSubscribers();
+        this.subscribesHashtagTo = recoverHashtagUser();
+    }
+
+    public HashMap<String, ArrayList<User>> recoverHashtagUser(){
+        HashMap<String, ArrayList<User>> subscribers = new HashMap<>();
+        ArrayList<String> hashtag = new ArrayList<>();
+        String[] hashtags = connexion.selectAllHashtagUser("").split("\n");
+
+        /** Récupérations de tous les hashtags et ajout dans une liste **/
+        for(String s : hashtags){
+            String[] h = s.split("\t");
+            if(h.length > 0)
+                hashtag.add(h[2]);
+        }
+        /** Pour chaque hashtag, on cherche tous les users qui sont abonnés **/
+        for(String h : hashtag){
+            String[] res = connexion.selectAllHashtagUser("where hashtag = '" + h + "'").split("\n");
+            ArrayList<User> user = new ArrayList<>();
+            for(String s : res){
+                if(s.length()>1){
+                    user.add(new User(s.split("\n")[1]));
+                }
+            }
+            subscribers.put(h,user);
+
+        }
+        return subscribers;
+    }
+    public  HashMap<String, ArrayList<User>> recoverSubscribers(){
+        HashMap<String, ArrayList<User>> subscribers = new HashMap<>();
+        ArrayList<String> usernames = new ArrayList<>();
+        String[] users = connexion.selectAllUser().split("\n");
+
+        for(String s : users){
+            String[] user = s.split("\t");
+            if(user.length > 0)
+                usernames.add(user[1]);
+        }
+        for(String user : usernames){
+            String[] res = connexion.selectAllUserList("where username = '" + user + "'").split("\n");
+
+            ArrayList<User> temp = new ArrayList<>();
+            for(String s : res){
+                if(s.length() > 1)
+                    temp.add(new User(s.split("\t")[2]));
+            }
+            subscribers.put(user,temp);
+        }
+        return subscribers;
+    }
+    public HashMap<String,User> recoverUser(){
+        HashMap<String, User> userList = new HashMap<String, User>();
+        String users_sql = connexion.selectAllUser();
+        String[] users = users_sql.split("\n");
+        for(String s : users){
+            String[] user = s.split("\t");
+            userList.put(user[1],new User(user[1]));
+        }
+        return userList;
     }
 
     /*************************************************************************************************

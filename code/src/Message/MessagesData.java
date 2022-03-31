@@ -1,5 +1,7 @@
 package Message;
 
+import SQL.Connexion;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -8,11 +10,65 @@ import java.util.Objects;
 public class MessagesData {
 
     public HashMap<Integer, Message> messages; // Table message id PK + string message
+    public Connexion connexion = new Connexion();
 
     public MessagesData() {
-        messages = new HashMap<>();
-    }
+        connexion.connect();
+        String[] res;
+        int i = 2;
 
+        String[] messages_recovered= connexion.selectAllMessage("").split("\n");
+
+        for(String s : messages_recovered){
+            res = s.split("\t");
+            int id = Integer.parseInt(res[0]);
+            String author = res[1];
+            ArrayList<String> hashtag = getHashtags(id);
+            String message = res[2];
+            boolean republish = Integer.parseInt(res[3]) != 0;
+            int reply = res[4].equals("0") ? 0 : 1;
+            ArrayList<Message> reponses = recoverResponses(id);
+
+            if(reponses.size() > 0 )
+                messages.put(id,new Message(id,author,hashtag,message,reponses,republish,reply));
+            else
+                messages.put(id,new Message(id,author,hashtag,message,republish,reply));
+        }
+        connexion.close();
+    }
+    public ArrayList<String> getHashtags(int id){
+        ArrayList<String> retour = new ArrayList<>();
+        String responses = connexion.selectAllHashtagMessage("where id_message = "+ id);
+        String[] res = responses.split("\n");
+        for(String s : res){
+            String[] ss = s.split("\t");
+            if(ss.length > 1 )
+                retour.add(ss[2]);
+        }
+        return retour;
+    }
+    public ArrayList<Message> recoverResponses(int initial_id) {
+        ArrayList<Message> retour = new ArrayList<Message>();
+        String[] res;
+
+        String response = connexion.selectAllMessageResponses("where id_message = " + initial_id);
+        if (response.length() < 1)
+            return retour;
+        res = response.split("\t");
+        String[] msg_res;
+        for (String r : res) {
+            String msg = connexion.selectAllMessage("where id = " + r);
+            msg_res = msg.split("\t");
+            int id = Integer.parseInt(msg_res[0]);
+            String author = msg_res[1];
+            ArrayList<String> hashtag = getHashtags(id);
+            String message = msg_res[2];
+            boolean republish = Integer.parseInt(msg_res[3]) != 0;
+            int reply = msg_res[4].equals("0") ? 0 : 1;
+            retour.add(new Message(id, author, hashtag, message, republish, reply));
+        }
+        return retour;
+    }
     /**************************************************************************************************
      * ajout de message dans la Data, la position du message est son id
      * @param message le message avec toutes les données qu'il doit contenir

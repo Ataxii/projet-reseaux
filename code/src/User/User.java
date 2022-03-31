@@ -1,5 +1,7 @@
 package User;
 
+import SQL.Connexion;
+
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -7,11 +9,13 @@ public class User {
     public String userName;
     private HashMap<String, User> subscribes;
     private HashSet<String> hashtags;
+    private final Connexion connexion = new Connexion();
 
     public User(String userName) {
         this.userName = userName;
         this.subscribes = new HashMap<String, User>();
         this.hashtags = new HashSet<>();
+        connexion.insertUser(userName,"");
     }
 
     public HashMap<String, User> getSubscribe() {
