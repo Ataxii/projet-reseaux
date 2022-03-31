@@ -1,4 +1,5 @@
 import java.io.BufferedReader;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -7,10 +8,12 @@ public class MasterFlux extends Thread {
 
     public BufferedReader in;
     public Command command;
+    public PrintStream out;
 
-    public MasterFlux(BufferedReader in, Command command) {
+    public MasterFlux(BufferedReader in, PrintStream out, Command command) {
         this.in = in;
         this.command = command;
+        this.out = out;
     }
 
     @Override
@@ -40,6 +43,8 @@ public class MasterFlux extends Thread {
                     else arrayList.add("\r\n");
                 }
                 else continue;
+
+
                 String message = "";
 
                 for (int i = 1 ; i < arrayList.size()-1; i++) {
@@ -47,7 +52,9 @@ public class MasterFlux extends Thread {
                 }
 
                 int id = Integer.parseInt(arrayList.get(0));
-                command.getChoice(message, id);
+
+
+                out.print(command.getChoice(message, id));
             }
         }catch (Exception e){
             System.out.println("problème de reception du message venant du serveur master [" + Arrays.toString(e.getStackTrace()) + "]");

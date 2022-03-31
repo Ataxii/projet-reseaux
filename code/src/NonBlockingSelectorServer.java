@@ -70,7 +70,7 @@ public class NonBlockingSelectorServer {
 
             out = new PrintStream(socket.getOutputStream());
             ExecutorService poolForMaster = Executors.newCachedThreadPool();
-            poolForMaster.execute(new MasterFlux(in, command));
+            poolForMaster.execute(new MasterFlux(in, out, command));
             out.print("SERVERCONNECT");
         }
 

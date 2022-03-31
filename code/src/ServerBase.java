@@ -67,7 +67,7 @@ public class ServerBase {
 
             out = new PrintStream(socket.getOutputStream());
             ExecutorService poolForMaster= Executors.newCachedThreadPool();
-            poolForMaster.execute(new MasterFlux(in, command));
+            poolForMaster.execute(new MasterFlux(in,out, command));
         }
 
         while (true) {
