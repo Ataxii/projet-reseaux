@@ -21,18 +21,21 @@ public class MessagesData {
 
         for(String s : messages_recovered){
             res = s.split("\t");
-            int id = Integer.parseInt(res[0]);
-            String author = res[1];
-            ArrayList<String> hashtag = getHashtags(id);
-            String message = res[2];
-            boolean republish = Integer.parseInt(res[3]) != 0;
-            int reply = res[4].equals("0") ? 0 : 1;
-            ArrayList<Message> reponses = recoverResponses(id);
+            System.out.println("le s : >" + s + "<");
+            if (s.length() > 1){
+                int id = Integer.parseInt(res[0]);
+                String author = res[1];
+                ArrayList<String> hashtag = getHashtags(id);
+                String message = res[2];
+                boolean republish = Integer.parseInt(res[3]) != 0;
+                int reply = res[4].equals("0") ? 0 : 1;
+                ArrayList<Message> reponses = recoverResponses(id);
 
-            if(reponses.size() > 0 )
-                messages.put(id,new Message(id,author,hashtag,message,reponses,republish,reply));
-            else
-                messages.put(id,new Message(id,author,hashtag,message,republish,reply));
+                if(reponses.size() > 0 )
+                    messages.put(id,new Message(id,author,hashtag,message,reponses,republish,reply));
+                else
+                    messages.put(id,new Message(id,author,hashtag,message,republish,reply));
+            }
         }
         connexion.close();
     }
