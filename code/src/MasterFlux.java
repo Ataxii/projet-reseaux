@@ -20,8 +20,8 @@ public class MasterFlux extends Thread {
     public void run() {
         try{
             while (true){
-                //c'est ici que la connection au serveur maitre ce fait
-                //quand on recoi une requete on la traite comme avant
+                //c'est ici que la connexion au serveur maitre ce fait
+                //quand on reçoit une requête on la traite comme avant
                 //regarde tout le temps si le serveur envoie quelque chose au quel cas on l'affiche
 
 
@@ -30,9 +30,9 @@ public class MasterFlux extends Thread {
 
                 while(!(line = in.readLine()).isEmpty())
                 {
+
                     arrayList.add(line);
                 }
-
                 if(arrayList.size()>1){
                     if (arrayList.get(1).contains("PUBLISH")){
                         arrayList.add(2, "\r\n" );
@@ -54,7 +54,7 @@ public class MasterFlux extends Thread {
                 int id = Integer.parseInt(arrayList.get(0));
 
 
-                out.print(command.getChoice(message, id));
+                command.getChoice(message, id);
             }
         }catch (Exception e){
             System.out.println("problème de reception du message venant du serveur master [" + Arrays.toString(e.getStackTrace()) + "]");

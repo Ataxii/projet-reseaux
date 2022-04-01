@@ -201,9 +201,11 @@ public class Microblogamu {
             while (!kill) {
                 try {
                     String read = in.readLine();
+                    System.out.println(read);
                     if (read.contains("OK")|| read.contains("ERROR")){
                         System.out.println(read);
                     }else {
+                        System.out.println("ta grosse mere");
                         actu.add(read);
                     }
                 } catch (IOException e) {

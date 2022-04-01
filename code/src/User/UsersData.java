@@ -4,7 +4,6 @@ import Message.Message;
 import SQL.Connexion;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,7 +19,7 @@ public class UsersData {
     public HashMap<String, User> userList;
 
     //liste pour chaque utilisateur, les messages a publier <User qui veut recup les messages, liste des message a recuperer>
-    public ConcurrentHashMap<User, ArrayBlockingQueue<Message>> messagesToUpdate;
+    public ConcurrentHashMap<String, ArrayBlockingQueue<Message>> messagesToUpdate;
 
     //un utilisateur et ses abonnés
     public HashMap<String, ArrayList<User>> subscribesTo;
@@ -31,10 +30,9 @@ public class UsersData {
     private final Connexion connexion = new Connexion();
     public UsersData() {
         this.userList = recoverUser(); // Table
-        this.messagesToUpdate = new ConcurrentHashMap<User, ArrayBlockingQueue<Message>>();
-
-       this.subscribesTo = recoverSubscribers();
-       this.subscribesHashtagTo = recoverHashtagUser();
+        this.messagesToUpdate = new ConcurrentHashMap<String, ArrayBlockingQueue<Message>>();
+        this.subscribesTo = recoverSubscribers();
+        this.subscribesHashtagTo = recoverHashtagUser();
     }
 
     public HashMap<String, ArrayList<User>> recoverHashtagUser(){
@@ -45,18 +43,16 @@ public class UsersData {
         /** Récupérations de tous les hashtags et ajout dans une liste **/
         for(String s : hashtags){
             String[] h = s.split("\t");
-            if(h.length > 0)
+            if(h.length > 1)
                 hashtag.add(h[2]);
         }
         /** Pour chaque hashtag, on cherche tous les users qui sont abonnés **/
         for(String h : hashtag){
+            String[] res = connexion.selectAllHashtagUser("where hashtag = '" + h + "'").split("\n");
             ArrayList<User> user = new ArrayList<>();
-            if(h.length() >0){
-                String[] res = connexion.selectAllHashtagUser("where hashtag = '" + h + "'").split("\n");
-                for(String s : res){
-                    if(s.length()>1){
-                        user.add(new User(s.split("\t")[1]));
-                    }
+            for(String s : res){
+                if(s.length()>1){
+                    user.add(new User(s.split("\n")[1]));
                 }
             }
             subscribers.put(h,user);
@@ -92,9 +88,7 @@ public class UsersData {
         String[] users = users_sql.split("\n");
         for(String s : users){
             String[] user = s.split("\t");
-            if(user.length>1){
-                userList.put(user[1],new User(user[1]));
-            }
+            userList.put(user[1],new User(user[1]));
         }
         return userList;
     }
@@ -109,7 +103,7 @@ public class UsersData {
         newUser(new User(message.getAuthor()));
 
         for (User user: subscribesTo.get(message.getAuthor())){
-            messagesToUpdate.get(user).add(message);
+            messagesToUpdate.get(user.userName).add(message);
         }
 
 
@@ -124,8 +118,8 @@ public class UsersData {
             for (String hashtag :message.getHashtag()) {
                 if(hashtag != null){
                     for (User user: subscribesHashtagTo.get(hashtag)){
-                        if(!messagesToUpdate.get(user).contains(message)){
-                            messagesToUpdate.get(user).add(message);
+                        if(!messagesToUpdate.get(user.userName).contains(message)){
+                            messagesToUpdate.get(user.userName).add(message);
                         }
                     }
                 }
@@ -140,13 +134,12 @@ public class UsersData {
     public void newUser(User user){
         if(!userList.containsKey(user.userName)){
             userList.put(user.userName, user);
-            connexion.insertUser(user.userName,"");
         }
         if(!subscribesTo.containsKey(user.userName)){
             subscribesTo.put(user.userName, new ArrayList<User>());
         }
-        if(!messagesToUpdate.containsKey(user)){
-            messagesToUpdate.put(user, new ArrayBlockingQueue<Message>(300));
+        if(!messagesToUpdate.containsKey(user.userName)){
+            messagesToUpdate.put(user.userName, new ArrayBlockingQueue<Message>(300));
         }
         for (String hashtag :
                 user.getHashtag()) {

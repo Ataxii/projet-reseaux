@@ -9,7 +9,7 @@ import java.util.Objects;
 
 public class MessagesData {
 
-    public HashMap<Integer, Message> messages; // Table message id PK + string message
+    public HashMap<Integer, Message> messages = new HashMap<>(); // Table message id PK + string message
     public Connexion connexion = new Connexion();
 
     public MessagesData() {

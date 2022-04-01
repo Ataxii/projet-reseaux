@@ -29,8 +29,7 @@ public class MyFlux extends Thread {
 
                 User user = command.usersData.getUser(pseudo);
 
-                Message message = command.usersData.messagesToUpdate.get(user).take();
-
+                Message message = command.usersData.messagesToUpdate.get(user.userName).take();
                 byte[] response = (message + "\n").getBytes(StandardCharsets.UTF_8);
                 try {
                     client.write(ByteBuffer.wrap(response));
@@ -39,6 +38,7 @@ public class MyFlux extends Thread {
                 }
 
                 buffer.clear();
+
             }
         }catch (Exception e){
             System.out.println(e);

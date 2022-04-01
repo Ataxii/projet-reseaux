@@ -32,10 +32,7 @@ public class Message {
         this.republish = republish;
         this.reply = reply;
 
-        /** TODO à tester mais ça devrait marcher **/
         connexion.insertMessage(author,message,republish,reply);
-        //String id_m = connexion.selectAllMessage("WHERE author = " + author + "AND message = " + message + ";").split(" ")[0];
-        //connexion.insertMessageResponse(Integer.parseInt(id_m),-1);
     }
 
     public Message(int id, String author, ArrayList<String> hashtag, String message, ArrayList<Message> responses, boolean republish, int reply) {
@@ -47,12 +44,6 @@ public class Message {
         this.responses = responses;
         this.republish = republish;
         this.reply = reply;
-
-        /** TODO à tester mais ça devrait marcher **/
-        connexion.insertMessage(author,message,republish,reply);
-
-        //String id_m = connexion.selectAllMessage("WHERE author = " + author + "AND message = " + message + ";").split(" ")[0];
-        //connexion.insertMessageResponse(Integer.parseInt(id_m),-1);
     }
 
     public void addResponse(Message response) {
