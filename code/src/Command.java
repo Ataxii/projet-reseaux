@@ -198,7 +198,7 @@ public class Command {
         String entete = request.split("\r\n")[0];
         String body = request.split("\r\n")[1];
 
-        if(!entete.contains("author:") || entete.length() <= "author:@".length()||body.toCharArray().length > 280 )
+        if(!entete.contains("author:") || entete.length() <= "author:@".length()||body.toCharArray().length > 256 )
             verif = false;
 
         if (verif){

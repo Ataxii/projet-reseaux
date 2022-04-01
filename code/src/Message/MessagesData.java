@@ -14,7 +14,6 @@ public class MessagesData {
 
     public MessagesData() {
         connexion.connect();
-        System.out.println("Message data");
         String[] res;
         int i = 2;
 
@@ -22,7 +21,6 @@ public class MessagesData {
 
         for(String s : messages_recovered){
             res = s.split("\t");
-            System.out.println("le s : >" + s + "<");
             if (s.length() > 1){
                 int id = Integer.parseInt(res[0]);
                 String author = res[1];

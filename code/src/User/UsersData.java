@@ -30,8 +30,6 @@ public class UsersData {
 
     private final Connexion connexion = new Connexion();
     public UsersData() {
-        System.out.println("User data");
-
         this.userList = recoverUser(); // Table
         this.messagesToUpdate = new ConcurrentHashMap<User, ArrayBlockingQueue<Message>>();
 
@@ -94,7 +92,6 @@ public class UsersData {
         String[] users = users_sql.split("\n");
         for(String s : users){
             String[] user = s.split("\t");
-            System.out.println(user.length);
             if(user.length>1){
                 userList.put(user[1],new User(user[1]));
             }

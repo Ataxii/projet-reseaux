@@ -77,7 +77,6 @@ public class Connexion {
     }
     public String selectAllMessage(String where){
         String sql = "SELECT * FROM Message " + where;
-        System.out.println("sql = " + sql);
         StringBuilder response= new StringBuilder();
         try (Connection conn = DriverManager.getConnection(URL);
              Statement stmt  = conn.createStatement();
