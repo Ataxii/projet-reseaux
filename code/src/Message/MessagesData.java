@@ -14,6 +14,7 @@ public class MessagesData {
 
     public MessagesData() {
         connexion.connect();
+        System.out.println("Message data");
         String[] res;
         int i = 2;
 
@@ -62,6 +63,10 @@ public class MessagesData {
         for (String r : res) {
             String msg = connexion.selectAllMessage("where id = " + r);
             msg_res = msg.split("\t");
+
+            if(msg_res.length<1)
+                continue;
+
             int id = Integer.parseInt(msg_res[0]);
             String author = msg_res[1];
             ArrayList<String> hashtag = getHashtags(id);

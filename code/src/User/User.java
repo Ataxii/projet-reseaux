@@ -15,7 +15,7 @@ public class User {
         this.userName = userName;
         this.subscribes = new HashMap<String, User>();
         this.hashtags = new HashSet<>();
-        connexion.insertUser(userName,"");
+
     }
 
     public HashMap<String, User> getSubscribe() {

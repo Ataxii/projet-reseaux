@@ -159,7 +159,7 @@ public class NonBlockingSelectorServer {
         File file = null;
         try {
 
-            file = new File("/Users/ataxi/Library/Mobile Documents/com~apple~CloudDocs/Fac/L3/semestre 2/application reseaux/TP/projet-reseaux/pairs.cfg");
+            file = new File("./pairs.cfg");
 
             if (file.createNewFile()) {
                 System.out.println("Fichier créé!");

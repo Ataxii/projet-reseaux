@@ -4,6 +4,7 @@ import Message.Message;
 import SQL.Connexion;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,10 +30,13 @@ public class UsersData {
 
     private final Connexion connexion = new Connexion();
     public UsersData() {
+        System.out.println("User data");
+
         this.userList = recoverUser(); // Table
         this.messagesToUpdate = new ConcurrentHashMap<User, ArrayBlockingQueue<Message>>();
-        this.subscribesTo = recoverSubscribers();
-        this.subscribesHashtagTo = recoverHashtagUser();
+
+       this.subscribesTo = recoverSubscribers();
+       this.subscribesHashtagTo = recoverHashtagUser();
     }
 
     public HashMap<String, ArrayList<User>> recoverHashtagUser(){
@@ -48,11 +52,13 @@ public class UsersData {
         }
         /** Pour chaque hashtag, on cherche tous les users qui sont abonnés **/
         for(String h : hashtag){
-            String[] res = connexion.selectAllHashtagUser("where hashtag = '" + h + "'").split("\n");
             ArrayList<User> user = new ArrayList<>();
-            for(String s : res){
-                if(s.length()>1){
-                    user.add(new User(s.split("\n")[1]));
+            if(h.length() >0){
+                String[] res = connexion.selectAllHashtagUser("where hashtag = '" + h + "'").split("\n");
+                for(String s : res){
+                    if(s.length()>1){
+                        user.add(new User(s.split("\t")[1]));
+                    }
                 }
             }
             subscribers.put(h,user);
@@ -88,7 +94,10 @@ public class UsersData {
         String[] users = users_sql.split("\n");
         for(String s : users){
             String[] user = s.split("\t");
-            userList.put(user[1],new User(user[1]));
+            System.out.println(user.length);
+            if(user.length>1){
+                userList.put(user[1],new User(user[1]));
+            }
         }
         return userList;
     }
@@ -134,6 +143,7 @@ public class UsersData {
     public void newUser(User user){
         if(!userList.containsKey(user.userName)){
             userList.put(user.userName, user);
+            connexion.insertUser(user.userName,"");
         }
         if(!subscribesTo.containsKey(user.userName)){
             subscribesTo.put(user.userName, new ArrayList<User>());

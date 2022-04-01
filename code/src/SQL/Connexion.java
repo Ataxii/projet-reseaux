@@ -61,6 +61,20 @@ public class Connexion {
         }
         return String.valueOf(response);
     }
+    public String selectAllUserGroupBy(){
+        String sql = "SELECT * FROM User group by username" ;
+        StringBuilder response= new StringBuilder();
+        try (Connection conn = DriverManager.getConnection(URL);
+             Statement stmt  = conn.createStatement();
+             ResultSet rs    = stmt.executeQuery(sql)){
+            while (rs.next()) {
+                response.append(rs.getInt("id")).append("\t").append(rs.getString("username")).append("\t").append(rs.getString("subscriber")).append("\n");
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return String.valueOf(response);
+    }
     public String selectAllMessage(String where){
         String sql = "SELECT * FROM Message " + where;
         System.out.println("sql = " + sql);
