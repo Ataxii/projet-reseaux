@@ -105,7 +105,7 @@ public class NonBlockingSelectorServer {
 
                             //message envoyé d'un serveur au serveur master pour lui notifier que cest un serveur et non un client
                             if (msg.replace("\n", "").equals("SERVERCONNECT")) {
-                                listServer.add(client);//TODO test
+                                listServer.add(client);
                                 buffer.clear();
                                 continue;
                             }
@@ -125,20 +125,17 @@ public class NonBlockingSelectorServer {
                                 executor = Executors.newCachedThreadPool();
                                 String pseudo = msg.split(" ")[1].replace("\n", "").replace(" ", "");
                                 executor.execute(new MyFlux(buffer, client, command, pseudo));
-                                //client.write(ByteBuffer.wrap("flux connected".getBytes(StandardCharsets.UTF_8)));
                             } else {
                                 if (isMaster) {
                                     ///////choix du client///////
-                                    String responseServ = command.getChoice(msg, id);
+                                    command.getChoice(msg, id);
                                     //ajout de l'id pour que tous les autres serveurs aient le meme
                                     msg = (id - 1) + "\n" + msg + "\n";
                                     buffer.flip();
-                                    //byte[] response = (responseServ + "\n").getBytes(StandardCharsets.UTF_8);
                                     //renvoie à tous les autres serveurs le message en brut pour qu'ils le gerent eux meme
                                     for (SocketChannel channel : listServer) {
                                         channel.write(ByteBuffer.wrap(msg.getBytes(StandardCharsets.UTF_8)));
                                     }
-                                    //client.write(ByteBuffer.wrap(response));
 
                                 } else {
                                     //envoie de la requete sur le serveur maitre
