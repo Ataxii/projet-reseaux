@@ -67,7 +67,7 @@ public class UsersData {
 
         for(String s : users){
             String[] user = s.split("\t");
-            if(user.length > 0)
+            if(user.length > 1)
                 usernames.add(user[1]);
         }
         for(String user : usernames){
@@ -88,7 +88,8 @@ public class UsersData {
         String[] users = users_sql.split("\n");
         for(String s : users){
             String[] user = s.split("\t");
-            userList.put(user[1],new User(user[1]));
+            if(s.length() > 1)
+                userList.put(user[1],new User(user[1]));
         }
         return userList;
     }
@@ -134,6 +135,7 @@ public class UsersData {
     public void newUser(User user){
         if(!userList.containsKey(user.userName)){
             userList.put(user.userName, user);
+            connexion.insertUser(user.userName, "");
         }
         if(!subscribesTo.containsKey(user.userName)){
             subscribesTo.put(user.userName, new ArrayList<User>());
@@ -160,7 +162,7 @@ public class UsersData {
 
         newUser(newFriend);
         newUser(new User(user1));
-
+        connexion.insertUserList(user1,newFriend.userName);
         userList.get(user1).addSubscribe(newFriend);
         subscribesTo.get(newFriend.userName).add(userList.get(user1));
 
@@ -183,7 +185,7 @@ public class UsersData {
             subscribesHashtagTo.put(hashtag, new ArrayList<User>());
         }
         subscribesHashtagTo.get(hashtag).add(userList.get(user1));
-
+        connexion.insertHashtagUser(user1,hashtag);
     }
 
 

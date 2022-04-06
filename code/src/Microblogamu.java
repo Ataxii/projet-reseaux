@@ -122,7 +122,7 @@ public class Microblogamu {
         switch (command) {
             case "PUBLISH":
                 if (request.split(" ").length < 3 || !request.contains("author:@")) {
-                    System.out.println("Usage : PUBLISH author:@user Message:Message");
+                    System.out.println("Usage : PUBLISH author:@user <message>");
                     return null;
                 }
                 String pseudo = request.split(" ")[1];
@@ -130,7 +130,7 @@ public class Microblogamu {
 
             case "REPLY":
                 if (request.split(" ").length < 4 || !request.contains("author:@") || !request.contains("reply_to_id:")) {
-                    System.out.println("Usage : REPLY author:@user reply_to_id:id msg");
+                    System.out.println("Usage : REPLY author:@user reply_to_id:id <message>");
                     return null;
                 }
                 String author = request.split(" ")[1];
@@ -174,8 +174,8 @@ public class Microblogamu {
             default:
                 System.out.println("""
                         Commande inconnu, \r
-                           Usage : PUBLISH author:@user Message:message \r
-                           Usage : REPLY author:@user reply_to_id:id Message:message \r
+                           Usage : PUBLISH author:@user <message> \r
+                           Usage : REPLY author:@user reply_to_id:id <message> \r
                            Usage : REPUBLISH author:@user msg_id:id \r
                            Usage : (UN)SUBSCRIBE author:@author user:@user || tag:tag\r
                            Usage : REFRESH\r
@@ -205,7 +205,6 @@ public class Microblogamu {
                     if (read.contains("OK")|| read.contains("ERROR")){
                         System.out.println(read);
                     }else {
-                        System.out.println("ta grosse mere");
                         actu.add(read);
                     }
                 } catch (IOException e) {

@@ -1,7 +1,7 @@
 javac Main.java NonBlockingSelectorServer.java Command.java
 
 PUBLISH author:@sa salut
-PUBLISH author:@to salut
+PUBLISH author:@to non
 
 RCV_MSG msg_id:7
 
